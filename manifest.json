@@ -1,0 +1,11 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "LORIANO 아카이브",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "LORIANO 아카이브",
+  "start_url": "/",
+  "theme_color": "#fdfbf7"
+}
