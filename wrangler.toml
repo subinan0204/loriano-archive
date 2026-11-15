@@ -1,0 +1,11 @@
+name = "loriano-playlist-sync"
+main = "playlist-sync-worker.mjs"
+compatibility_date = "2026-11-15"
+workers_dev = true
+
+[[kv_namespaces]]
+binding = "PLAYLIST_KV"
+id = "71c79136ea7243a7ad7021cfaf83eb8b"
+
+[triggers]
+crons = ["17 0 * * *"]
