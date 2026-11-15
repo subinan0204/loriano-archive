@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LORIANO queue tests</title>
+<h1>LORIANO 큐 회귀 테스트</h1><p>네트워크·재생·저장소 변경 없이 큐만 검사합니다.</p><pre id="result">검사 중…</pre>
+<script src="./mini-player-catalog.js"></script><script src="./mini-player-queue.js"></script>
+<script>
+'use strict';
+try {
+ const ids = LorianoPlaylistCatalog.tracks.map(t => t.id);
+ let count = 0;
+ const assert = (ok, name) => { if (!ok) throw new Error(name); count++; };
+ for (let cycle = 0; cycle < 20; cycle++) {
+  const q = new LorianoQueue(ids), seen = [q.current];
+  for (let i = 1; i < ids.length; i++) seen.push(q.next());
+  assert(new Set(seen).size === ids.length, 'full shuffle unique');
+  const last = q.current;
+  assert(q.next() !== last, 'cycle boundary repeat');
+  const current = q.current;
+  assert(q.previous() === last, 'previous history');
+  assert(q.next() === current, 'forward history');
+  const restored = new LorianoQueue(ids, q.snapshot());
+  assert(restored.current === q.current, 'restore current');
+  assert(JSON.stringify(restored.snapshot()) === JSON.stringify(q.snapshot()), 'restore shuffle state');
+ }
+ const seq = new LorianoQueue(ids, { mode: 'sequential' });
+ for (let i = 1; i < ids.length; i++) assert(seq.next() === ids[i], 'sequential order');
+ assert(seq.next() === null, 'sequential stops');
+ seq.setMode('repeat'); assert(seq.next() === ids[0], 'repeat wraps');
+ const q = new LorianoQueue(ids); q.next(); q.next();
+ const saved = q.snapshot(), removed = saved.history[0];
+ const changed = new LorianoQueue(ids.filter(id => id !== removed), saved);
+ assert(changed.current === q.current && changed.history.length === 2, 'removed item remaps cursor');
+ assert(new LorianoQueue([]).next() === null, 'empty playlist');
+ assert(new LorianoQueue([ids[0]]).next() === ids[0], 'one track');
+ document.getElementById('result').textContent = 'PASS: ' + count + ' assertions; ' + ids.length + ' tracks';
+} catch (error) {
+ document.getElementById('result').textContent = 'FAIL: ' + error.message;
+ throw error;
+}
+</script></html>
