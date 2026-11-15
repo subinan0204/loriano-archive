@@ -1,0 +1,53 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+import {fileURLToPath} from 'node:url';
+
+// In-memory DB and localStorage only. No browser or production writes.
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const html=await fs.readFile(path.join(root,'index.html'),'utf8');
+const script=[...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)].map(m=>m[1]).find(s=>s.includes('window.ArchiveEngine='));
+const copy=x=>structuredClone(x),empty=()=>({videos:[],comments:[],meta:[]}),LS='loriano-settings-v1';
+let passed=0;
+async function test(name,fn){try{await fn();passed++;console.log('PASS '+name);}catch(e){console.error('FAIL '+name);throw e;}}
+function harness(initial=empty(),options={}){
+ const data=copy(initial),events=[],local=new Map(Object.entries(options.local||{}));let serial=0,fetches=0;
+ const localStorage={get length(){return local.size;},key:i=>[...local.keys()][i]??null,getItem:k=>local.get(k)??null,setItem(k,v){events.push({op:'localSet',key:k});local.set(k,String(v));},removeItem(k){events.push({op:'localRemove',key:k});local.delete(k);}};
+ const db={close(){},transaction(names,mode='readonly'){
+  names=Array.isArray(names)?names:[names];const id=++serial;
+  if(mode==='readwrite')options.beforeWrite?.({data,local});
+  const working=Object.fromEntries(names.map(n=>[n,new Map(data[n].map(r=>[r[n==='meta'?'key':'id'],copy(r)]))]));
+  let pending=0,done=false,scheduled=false;const tx={error:null};events.push({op:'transaction',id,mode,stores:[...names]});
+  const commit=()=>{if(scheduled)return;scheduled=true;setImmediate(()=>{scheduled=false;if(done||pending)return;if(mode==='readwrite')for(const n of names)data[n]=[...working[n].values()].map(copy);done=true;tx.oncomplete?.();});};
+  tx.abort=()=>{if(done)return;done=true;events.push({op:'abort',id});setImmediate(()=>tx.onabort?.());};
+  function request(op,name,fn){if(done)throw new Error('Inactive transaction');const req={};pending++;events.push({op,store:name,id,mode});setImmediate(()=>{if(done)return;try{req.result=fn();req.onsuccess?.();}catch(e){req.error=e;tx.error=e;req.onerror?.();tx.abort();}finally{pending--;commit();}});return req;}
+  tx.objectStore=name=>{
+   assert(names.includes(name));const values=()=>[...working[name].values()];
+   const write=(op,row)=>{assert.equal(mode,'readwrite');return request(op,name,()=>{if(options.failAdd&&op==='add')throw new Error('Injected add failure');const key=row[name==='meta'?'key':'id'];if(op==='add'&&working[name].has(key))throw new Error('ConstraintError');working[name].set(key,copy(row));return key;});};
+   return {getAll:()=>request('getAll',name,()=>copy(values())),count:()=>request('count',name,()=>values().length),add:row=>write('add',row),put:row=>write('put',row),clear:()=>request('clear',name,()=>working[name].clear()),delete:key=>request('delete',name,()=>working[name].delete(key)),index:field=>({getAll:value=>request('getAll',name,()=>copy(values().filter(r=>r[field]===value)))})};
+  };commit();return tx;
+ }};
+ const indexedDB={open(){const req={};setImmediate(()=>{req.result=db;req.onsuccess?.();});return req;}};
+ const window={LorianoArchivePolicy:{ready:Promise.resolve(),isAllowed:()=>true,view:rows=>rows}};
+ const context=vm.createContext({window,indexedDB,localStorage,structuredClone,URL,AbortController,setTimeout,clearTimeout,console,fetch:async url=>{fetches++;const endpoint=new URL(url).pathname.split('/').at(-1);const body=options.api?options.api(endpoint):endpoint==='channels'?{items:[{id:options.channel||'channel-new',snippet:{title:'Test'},statistics:{},contentDetails:{relatedPlaylists:{uploads:'uploads'}}}]}:{items:[]};return {ok:true,json:async()=>body};}});
+ // Test-only exposure of the private guard; production source remains private.
+ vm.runInContext(script.replace('const engine={init,','const engine={clearDB,init,'),context);
+ const E=window.ArchiveEngine;
+ return {E,data,events,local,get fetches(){return fetches;},snapshot:()=>JSON.stringify({data,local:[...local]}),async init(){await E.init();events.length=0;},writes:()=>events.filter(e=>['add','put','clear','delete','localSet','localRemove'].includes(e.op))};
+}
+async function rejectsWithoutWrites(h,action){const before=h.snapshot(),meta=JSON.stringify(await h.E.getMeta());await assert.rejects(action,e=>e.preserveData===true);assert.equal(h.snapshot(),before);assert.equal(JSON.stringify(await h.E.getMeta()),meta);assert.deepEqual(h.writes(),[]);}
+await test('startup only reads existing data',async()=>{const h=harness({videos:[{id:'v'}],comments:[{id:'c',videoId:'v'}],meta:[{key:'state',value:{mode:'live'}}]});await h.init();assert.deepEqual(h.writes(),[]);});
+await test('channel switch rejects before state/settings writes and catch does not persist',async()=>{const h=harness({videos:[{id:'v'}],comments:[{id:'c',videoId:'v'}],meta:[{key:'state',value:{mode:'live',channel:{id:'channel-old'},lastError:'preserved',resume:{test:true}}}]},{local:{[LS]:JSON.stringify({apiKey:'test-key',handle:'@test'})}});await h.init();await rejectsWithoutWrites(h,()=>h.E.sync());assert.equal(h.fetches,1);});
+await test('sample-mode sync rejects before API call or mutation',async()=>{const h=harness({videos:[{id:'sample-001'}],comments:[],meta:[{key:'state',value:{mode:'sample',channel:{id:'sample-loriano'}}}]});await h.init();await rejectsWithoutWrites(h,()=>h.E.sync());assert.equal(h.fetches,0);});
+for(const store of ['videos','comments','meta'])await test('sample rejects existing '+store+' even without state',async()=>{const data=empty();data[store]=[store==='meta'?{key:'unrelated',value:{}}:{id:'existing',videoId:'other'}];const h=harness(data);await h.init();await rejectsWithoutWrites(h,()=>h.E.sample());});
+for(const [key,value]of [[LS,'{}'],['loriano-player-v1','{"queue":[]}'],['loriano-search','term'],['loriano-settings-corrupt','{'],['unrecognized-existing-key','private'],['loriano-zero','0']])await test('sample respects actual nonempty localStorage: '+key,async()=>{const h=harness(empty(),{local:{[key]:value}});await h.init();await rejectsWithoutWrites(h,()=>h.E.sample());});
+await test('empty storage seed uses one atomic add-only transaction',async()=>{const h=harness();await h.init();const result=await h.E.sample();assert.equal(result.mode,'sample');assert.equal(h.data.videos.length,200);assert.equal(h.data.comments.length,600);assert.equal(h.data.meta.length,1);const writes=h.writes();assert.equal(writes.length,801);assert(writes.every(e=>e.op==='add'));assert.equal(new Set(writes.map(e=>e.id)).size,1);const id=writes[0].id,events=h.events.filter(e=>e.id===id),counts=events.filter(e=>e.op==='count');assert.deepEqual(counts.map(e=>e.store).sort(),['comments','meta','videos']);assert(events.findIndex(e=>e.op==='add')>events.map(e=>e.op).lastIndexOf('count'));assert(events.some(e=>e.mode==='readwrite'&&e.stores.length===3));h.events.length=0;await rejectsWithoutWrites(h,()=>h.E.sample());});
+for(const store of ['videos','comments','meta'])await test('atomic seed rejects concurrent '+store+' insertion before any add',async()=>{let injected=false;const h=harness(empty(),{beforeWrite({data}){if(!injected){injected=true;data[store].push(store==='meta'?{key:'concurrent',value:1}:{id:'concurrent'});}}});await h.init();await assert.rejects(()=>h.E.sample(),e=>e.preserveData===true);assert.deepEqual(h.writes(),[]);assert.equal(h.data[store].length,1);assert.equal(JSON.stringify(await h.E.getMeta()),'{}');});
+await test('atomic seed rechecks localStorage before adding',async()=>{const h=harness(empty(),{beforeWrite({local}){local.set('loriano-player','new state');}});await h.init();await assert.rejects(()=>h.E.sample(),e=>e.preserveData===true);assert.deepEqual(h.writes(),[]);assert.deepEqual(h.data,empty());assert.equal(JSON.stringify(await h.E.getMeta()),'{}');});
+await test('failed seed aborts all stores and leaves memory unchanged',async()=>{const h=harness(empty(),{failAdd:true});await h.init();await assert.rejects(()=>h.E.sample(),/Injected add failure/);assert.deepEqual(h.data,empty());assert.equal(JSON.stringify(await h.E.getMeta()),'{}');});
+for(const method of ['reset','clearDB'])await test(method+' throws protection and performs no writes',async()=>{const h=harness({videos:[{id:'v'}],comments:[{id:'c'}],meta:[{key:'state',value:{mode:'live'}}]},{local:{[LS]:'{"apiKey":"fixture-only"}','loriano-player':'queue'}});await h.init();await rejectsWithoutWrites(h,()=>h.E[method]());});
+await test('comment refresh preserves archived comments missing from API',async()=>{const comments=[{id:'old-top',videoId:'video',text:'archived'},{id:'old-reply',videoId:'video',parentId:'old-top',text:'archived reply'},{id:'other',videoId:'elsewhere',text:'unrelated'}];const h=harness({videos:[{id:'video'}],comments,meta:[{key:'state',value:{mode:'live'}}]},{local:{[LS]:'{"apiKey":"fixture-key"}'}});await h.init();await h.E.loadComments('video',()=>{},true);assert.deepEqual(h.data.comments,comments);assert(!h.writes().some(e=>['delete','clear'].includes(e.op)));assert((await h.E.getMeta()).commentCompleted.video);});
+await test('private backup fixture unchanged on every protected path',async()=>{const backupPath=process.argv[2]||path.resolve(root,'..','private-recovery','private-backup','loriano-private-backup-2026-11-15T03-54-43-435Z.json');const raw=await fs.readFile(backupPath,'utf8'),backup=JSON.parse(raw);const h=harness(backup.payload.stores,{local:{[LS]:JSON.stringify({apiKey:'fixture-only',handle:'@fixture'}),'loriano-player':backup.payload.playerState||'existing'},channel:'definitely-different'});await h.init();await rejectsWithoutWrites(h,()=>h.E.sample());await rejectsWithoutWrites(h,()=>h.E.reset());await rejectsWithoutWrites(h,()=>h.E.sync());assert.equal(await fs.readFile(backupPath,'utf8'),raw);});
+await test('UI protection, inline syntax, v6 assets and projection retained',async()=>{assert.match(html,/data-action="reset" disabled aria-disabled="true"/);assert.match(html,/초기화 비활성화 · 기록 보호/);assert(!html.includes('실제 저장 기록 대신 샘플 200개로 바꿀까요'));assert(!html.includes('초기화하면 API 키·설정·영상·댓글이 모두 지워집니다'));assert(!html.includes('localStorage.removeItem(LS)'));assert(!html.includes('store.delete(c.id)'));assert(html.includes('window.LorianoArchivePolicy.view'));for(const asset of ['archive-policy.js','mini-player-catalog.js','mini-player-queue.js','mini-player.js'])assert(html.includes(asset+'?v=6'));for(const match of html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g))if(match[1].trim())new vm.Script(match[1]);});
+console.log(JSON.stringify({pass:passed,fail:0,scope:'in-memory VM only; private backup read-only'}));
