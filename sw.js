@@ -16,7 +16,7 @@ self.addEventListener("message", (event) => {
 self.addEventListener('install', async (event) => {
   event.waitUntil(
     caches.open(CACHE)
-      .then((cache) => cache.addAll([offlineFallbackPage, './mini-player.css?v=1', './mini-player-catalog.js?v=1', './mini-player-queue.js?v=1', './mini-player.js?v=1']))
+      .then((cache) => cache.addAll([offlineFallbackPage, './mini-player.css?v=2', './mini-player-catalog.js?v=1', './mini-player-queue.js?v=1', './mini-player.js?v=1']))
   );
 });
 

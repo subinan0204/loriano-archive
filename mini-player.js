@@ -5,6 +5,8 @@
   if (!root || !window.LorianoQueue) return;
   const PLAYLIST = 'PLw0Eei7VXrvLJuQGHTo56dq0bGX9cKhy-';
   const WORKER_JSON = 'https://loriano-playlist-sync.subinan0204.workers.dev/api/playlist';
+  const playerStyle = document.querySelector('link[href*="mini-player.css"]');
+  if (playerStyle) { try { const styleURL = new URL(playerStyle.href); if (styleURL.searchParams.get('v') !== '2') { styleURL.searchParams.set('v', '2'); playerStyle.href = styleURL.href; } } catch {} }
   const KEY = 'loriano-mini-player-v1';
   const $ = selector => root.querySelector(selector);
   let publicSnapshot = null, publicSnapshotAt = 0, publicSnapshotRequest = null;
