@@ -1,0 +1,128 @@
+{"pass":605,"fail":0,"backupSha256":"876d0c4604b6fe9297209827642084b168bc7b6b869d2c227c6a66bf894123e4","counts":{"total":577,"short":299,"long":278,"review":0}}
+PASS /loriano-archive/ install precaches eleven scope-local shell, policy, manifest and icon resources
+PASS /loriano-archive/ offline navigation uses scope index including nested routes and queries
+PASS /loriano-archive/ canonical assets use network first and refresh offline cache
+PASS /loriano-archive/ old version query links fall back to current canonical versions without poisoning cache
+PASS /loriano-archive/ exact paths prevent nested asset and scope-prefix escape interception
+PASS /test/ install precaches eleven scope-local shell, policy, manifest and icon resources
+PASS /test/ offline navigation uses scope index including nested routes and queries
+PASS /test/ canonical assets use network first and refresh offline cache
+PASS /test/ old version query links fall back to current canonical versions without poisoning cache
+PASS /test/ exact paths prevent nested asset and scope-prefix escape interception
+PASS scope cache namespaces differ and activation never broadly deletes legacy or sibling caches
+PASS install fails clearly when precache or storage fails
+PASS activation tolerates unavailable CacheStorage and navigation preload
+PASS only explicit SKIP_WAITING message opts into activation
+PASS navigation preload takes priority and does not populate runtime cache
+PASS rejected navigation preload still attempts network
+PASS successful navigation uses network but never changes pinned offline index
+PASS cache open failure does not turn a successful network response into failure
+PASS quota/write failure preserves successful network response
+PASS offline cache open/match failures return valid 503 responses
+PASS HTTP errors do not overwrite good precached assets
+PASS opaque and redirected or cross-origin responses are never cached
+PASS cross-origin, API, media, non-GET and unknown assets are bypassed without cache/network work
+PASS same-origin API and media navigations are not handled
+PASS worker is self-contained and never touches persistent user data or claims clients
+
+25/25 passed; 0 failed. Report: C:\Users\Adnub\.aside\u\19\sessions\2026-11-16_MRtIB0KjHB6kD6no\tmp\recovered-app\results\sw-regression.json
+PASS personal getter remains nonwritable and personal 577 never replaces public queue
+PASS empty personal archive still uses designated public queue
+PASS failed personal archive read cannot block public queue
+PASS pending personal archive read cannot delay public queue
+PASS personal archive containing only excluded records cannot affect public queue
+PASS personal archive failure after initialization cannot prevent public playback
+PASS real bundled playlist contains exactly 205 unique valid designated public IDs
+PASS saved current position mode and history restore without iframe or autoplay
+PASS startup catalog and passive lifecycle preserve saved storage byte-for-byte until interaction
+PASS excluded saved current history and visited entries are purged
+PASS valid worker feed replaces bundled queue regardless of personal archive
+PASS invalid worker excluded ID retains trusted queue and displays explicit error
+PASS invalid worker decreased count retains trusted queue and displays explicit error
+PASS invalid worker duplicate IDs retains trusted queue and displays explicit error
+PASS invalid worker malformed ID retains trusted queue and displays explicit error
+PASS invalid worker missing ID retains trusted queue and displays explicit error
+PASS invalid worker null track retains trusted queue and displays explicit error
+PASS invalid worker empty feed retains trusted queue and displays explicit error
+PASS invalid worker incorrect count retains trusted queue and displays explicit error
+PASS invalid worker wrong playlist retains trusted queue and displays explicit error
+PASS invalid worker wrong schema retains trusted queue and displays explicit error
+PASS failed worker request retains trusted bundled queue with explicit error
+PASS late worker feed remains authoritative when personal archive changes
+PASS personal refresh during pending feed never selects personal records
+PASS explicit play creates one official-configured mock and resumes saved offset
+PASS play control toggles pause and resume without replacing current video
+PASS stop resets progress and cues without restarting playback
+PASS next previous and forward-history preserve real queue navigation
+PASS sequential mode stops at the last video
+PASS repeat mode wraps from last video to first
+PASS shuffle visits all videos once before a nonrepeating boundary
+PASS mode control cycles shuffle sequential repeat and persists mode
+PASS seeking a cued video updates offset without autoplay
+PASS seeking a paused video uses seekTo without replaying
+PASS metadata updates title elapsed duration and range
+PASS ended state advances once and retains user-authorized playback intent
+PASS close stops destroys hides and preserves position while ignoring old state events
+PASS reopen constructs a fresh player at the retained video and position
+PASS close during API loading prevents late iframe construction
+PASS close before onReady destroys pending player and permits clean reopening
+PASS immediate close after play prevents late setup even with pending personal read
+PASS details and mini players keep mutual-pause interaction
+PASS document hiding pauses without autoplay on returning
+PASS opening a details route pauses mini playback
+PASS storage denial shows warning but leaves in-memory playback usable
+PASS source invariants preserve archive API and compact uncropped viewport rules
+PASS personal saved current is never added to public queue and storage stays untouched until interaction
+PASS real trusted205 catalog survives truncated worker snapshot with explicit count error
+PASS HTTP failure preserves public queue and reports synchronization failure
+PASS invalid worker JSON preserves public queue and reports synchronization failure
+PASS worker timeout preserves public queue without initialization storage writes
+PASS floating controls move alongside video and return to original root when closed
+PASS detail player loads API and binds before mini player has ever played
+PASS explicit personal short plays manually without modifying public205 queue or history
+PASS manual play pause seek stop metadata all target independent active ID
+PASS manual end stops without advancing random queue or auto playing queue video
+PASS mpNext leaves manual and resumes public queue without personal history
+PASS mpPrevious leaves manual and resumes public queue without personal history
+PASS manual close and reopen creates fresh official player at retained manual offset
+PASS verified saved manual restores without iframe autoplay or initial storage writes
+PASS unverified or removed saved manual never becomes active or enters queue
+PASS manual detail click rejects ID not present in personal archive
+PASS close cancels outstanding manual verification before any iframe is created
+PASS manual selection reuses ready mini iframe and public next keeps it official
+PASS slow saved-manual verification cannot override explicit public navigation
+PASS manual selection pending API load is cancelled safely by close
+PASS catalog refresh while manual is paused does not overwrite active manual title or progress
+
+67/67 tests passed; 0 failed; 324 assertions.
+Results: C:\Users\Adnub\.aside\u\19\sessions\2026-11-16_MRtIB0KjHB6kD6no\tmp\recovered-app\results\mini-player-regression.json
+PASS startup only reads existing data
+PASS channel switch rejects before state/settings writes and catch does not persist
+PASS sample-mode sync rejects before API call or mutation
+PASS sample rejects existing videos even without state
+PASS sample rejects existing comments even without state
+PASS sample rejects existing meta even without state
+PASS sample respects actual nonempty localStorage: loriano-settings-v1
+PASS sample respects actual nonempty localStorage: loriano-player-v1
+PASS sample respects actual nonempty localStorage: loriano-search
+PASS sample respects actual nonempty localStorage: loriano-settings-corrupt
+PASS sample respects actual nonempty localStorage: unrecognized-existing-key
+PASS sample respects actual nonempty localStorage: loriano-zero
+PASS empty storage seed uses one atomic add-only transaction
+PASS atomic seed rejects concurrent videos insertion before any add
+PASS atomic seed rejects concurrent comments insertion before any add
+PASS atomic seed rejects concurrent meta insertion before any add
+PASS atomic seed rechecks localStorage before adding
+PASS failed seed aborts all stores and leaves memory unchanged
+PASS reset throws protection and performs no writes
+PASS clearDB throws protection and performs no writes
+PASS comment refresh preserves archived comments missing from API
+PASS private backup fixture unchanged on every protected path
+PASS UI protection, inline syntax, canonical asset versions and projection retained
+{"pass":23,"fail":0,"scope":"in-memory VM only; private backup read-only"}
+Scheduled playlist sync succeeded: 205 tracks
+Scheduled sync failed; previous snapshot was retained
+PASS: base Worker regression assertions (205 items, pagination, metadata, atomic failure, CORS, authorization).
+PASS: 55 additional Worker safety scenarios; synthetic API only; no live requests.
+PASS: 52 secure YouTube proxy scenarios; no live network or KV access.
+PASS: all Node suites. No live network, production DB, deployment, or real media tests were performed.

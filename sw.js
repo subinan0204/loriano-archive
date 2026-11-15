@@ -1,11 +1,11 @@
 // Self-contained offline shell. Cache ownership is isolated by registration scope.
 const scopeURL = new URL(self.registration.scope);
 const CACHE_PREFIX = 'loriano-archive-app:' + scopeURL.href + ':';
-const CACHE = CACHE_PREFIX + 'v6-production-safe';
+const CACHE = CACHE_PREFIX + 'v7-production-safe';
 const offlineFallbackPage = new URL('index.html', scopeURL).href;
 const assetVersions = new Map([
   ['mini-player.css', '?v=6'],
-  ['mini-player-catalog.js', '?v=6'],
+  ['mini-player-catalog.js', '?v=7'],
   ['mini-player-queue.js', '?v=6'],
   ['mini-player.js', '?v=6'],
   ['archive-policy.js', ''],

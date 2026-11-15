@@ -9,7 +9,7 @@ const source = await readFile(workerPath, 'utf8');
 const reportPath = new URL('../results/sw-regression.json', import.meta.url);
 const results = [];
 const origin = 'https://example.test';
-const names = ['index.html', 'mini-player.css?v=6', 'mini-player-catalog.js?v=6', 'mini-player-queue.js?v=6', 'mini-player.js?v=6', 'archive-policy.js', 'aspect-evidence.json', 'manifest.json', 'icon-192.png', 'icon-512.png', 'icon-512-maskable.png'];
+const names = ['index.html', 'mini-player.css?v=6', 'mini-player-catalog.js?v=7', 'mini-player-queue.js?v=6', 'mini-player.js?v=6', 'archive-policy.js', 'aspect-evidence.json', 'manifest.json', 'icon-192.png', 'icon-512.png', 'icon-512-maskable.png'];
 
 function harness(scopePath = '/test/', options = {}) {
   const scope = origin + scopePath;
@@ -108,7 +108,7 @@ for (const scope of ['/loriano-archive/', '/test/']) {
     const h = harness(scope); await h.lifecycle('install');
     assert.deepEqual(h.added, names.map(name => h.scope + name));
     assert.equal(h.stores.size, 1);
-    assert.match([...h.stores.keys()][0], /v6-production-safe$/);
+    assert.match([...h.stores.keys()][0], /v7-production-safe$/);
     assert.equal(h.skipped, 0);
   });
   await test(`${scope} offline navigation uses scope index including nested routes and queries`, async () => {
@@ -130,10 +130,10 @@ for (const scope of ['/loriano-archive/', '/test/']) {
       assert.equal(await (await h.request(name)).response.text(), 'network:' + h.scope + name);
     }
   });
-  await test(`${scope} old version query links fall back to v6 without poisoning canonical cache`, async () => {
+  await test(`${scope} old version query links fall back to current canonical versions without poisoning cache`, async () => {
     const h = harness(scope); await h.lifecycle('install');
     for (const name of names.filter(name => name.includes('?v='))) {
-      const old = name.replace('?v=6', '?v=1');
+      const old = name.replace(/\?v=\d+/, '?v=1');
       await h.request(old);
       assert.equal(h.puts.length, 0);
       h.setNetwork(offline);
@@ -155,7 +155,7 @@ await test('scope cache namespaces differ and activation never broadly deletes l
   await a.lifecycle('install'); await b.lifecycle('install');
   const current = [...a.stores.keys()][0], sibling = [...b.stores.keys()][0];
   assert.notEqual(current, sibling);
-  const obsolete = current.replace(/v6-production-safe$/, 'v4-old');
+  const obsolete = current.replace(/v7-production-safe$/, 'v4-old');
   for (const name of [obsolete, sibling, 'pwabuilder-page-v4-mini-player', 'unrelated-user-cache']) a.seed(name);
   await a.lifecycle('activate');
   assert.deepEqual(a.deleted, [obsolete]);

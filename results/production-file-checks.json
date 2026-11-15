@@ -1,0 +1,42 @@
+{
+  "at": "2026-11-15T16:02:15.405Z",
+  "checks": [
+    {
+      "file": "index.html",
+      "status": 200,
+      "bytes": 4769904,
+      "exact": true
+    },
+    {
+      "file": "mini-player.js",
+      "status": 200,
+      "bytes": 27177,
+      "exact": true
+    },
+    {
+      "file": "mini-player.css",
+      "status": 200,
+      "bytes": 6653,
+      "exact": true
+    },
+    {
+      "file": "archive-policy.js",
+      "status": 200,
+      "bytes": 2545,
+      "exact": true
+    },
+    {
+      "file": "aspect-evidence.json",
+      "status": 200,
+      "bytes": 977773,
+      "exact": true
+    },
+    {
+      "file": "sw.js",
+      "status": 200,
+      "bytes": 4439,
+      "exact": true
+    }
+  ],
+  "proxyStatus": 200
+}

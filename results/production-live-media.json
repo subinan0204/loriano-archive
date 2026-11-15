@@ -1,0 +1,146 @@
+{
+  "kind": "Actual official YouTube players, deployed scripts, isolated DB/LS, desktop Chromium responsive emulation",
+  "at": "2026-11-15T16:06:08.703Z",
+  "checks": [
+    {
+      "test": "deployed real short playback",
+      "mini": 1,
+      "time": 1.1605000267028809,
+      "id": "-V5UzDfnsdg",
+      "pass": true
+    },
+    {
+      "test": "UI pause",
+      "mini": 2,
+      "time": 1.210918,
+      "id": "-V5UzDfnsdg",
+      "pass": true
+    },
+    {
+      "test": "real detail plays and mini pauses",
+      "mini": 2,
+      "time": 1.564883,
+      "id": "-V5UzDfnsdg",
+      "detail": 1,
+      "detailTime": 0.05890105531311035,
+      "pass": true
+    },
+    {
+      "test": "mini resumes and detail pauses",
+      "mini": 1,
+      "time": 1.916475057220459,
+      "id": "-V5UzDfnsdg",
+      "detail": 2,
+      "detailTime": 0.016901,
+      "pass": true
+    },
+    {
+      "test": "UI close destroys actual iframe",
+      "frames": 0,
+      "oldDisconnected": true,
+      "pass": true
+    },
+    {
+      "test": "reopen creates new actual iframe and resumes",
+      "mini": 1,
+      "time": 25.666342104904174,
+      "id": "-V5UzDfnsdg",
+      "detail": 2,
+      "detailTime": 0.016901,
+      "fresh": true,
+      "pass": true
+    },
+    {
+      "test": "manual next returns public-only queue and real normal playback",
+      "mini": 1,
+      "time": 1.2551719885559083,
+      "id": "53v7lQAZL7o",
+      "detail": 2,
+      "detailTime": 0.016901,
+      "inDesignatedPlaylist": true,
+      "pass": true
+    },
+    {
+      "test": "previous public history",
+      "mini": 5,
+      "time": 0,
+      "id": "A0z5eRbEUBM",
+      "detail": 2,
+      "detailTime": 0.016901,
+      "pass": true
+    },
+    {
+      "test": "next forward history",
+      "mini": 5,
+      "time": 0,
+      "id": "53v7lQAZL7o",
+      "detail": 2,
+      "detailTime": 0.016901,
+      "pass": true
+    },
+    {
+      "test": "UI cycles shuffle sequential repeat",
+      "values": [
+        "재생 모드: 순차, 눌러서 변경",
+        "재생 모드: 전체 반복, 눌러서 변경",
+        "재생 모드: 랜덤, 눌러서 변경"
+      ],
+      "pass": true
+    },
+    {
+      "test": "actual official player seek via app range events",
+      "mini": 3,
+      "time": 12,
+      "id": "53v7lQAZL7o",
+      "pass": true
+    },
+    {
+      "test": "UI stop resets and cues without autoplay",
+      "mini": 5,
+      "time": 0,
+      "id": "53v7lQAZL7o",
+      "pass": true
+    },
+    {
+      "test": "last current position mode history restored without autoplay",
+      "same": true,
+      "frames": 0,
+      "progress": "17",
+      "mode": "재생 모드: 순차, 눌러서 변경",
+      "pass": true,
+      "difference": [
+        "updatedAt"
+      ],
+      "explanation": "Pagehide legitimately refreshed updatedAt after explicit prior interaction. All playback fields and new-page storage remain unchanged."
+    }
+  ],
+  "data": {
+    "stores": {
+      "videos": {
+        "count": 577,
+        "allFieldsEqual": true
+      },
+      "comments": {
+        "count": 2,
+        "allFieldsEqual": true
+      },
+      "meta": {
+        "count": 1,
+        "allFieldsEqual": true
+      }
+    },
+    "additionalWrites": [],
+    "errors": []
+  },
+  "originalProfile": {
+    "videos": 0,
+    "comments": 0,
+    "meta": 0,
+    "identityUnconfirmed": true,
+    "restored": false
+  },
+  "playlist": {
+    "catalogCount": 205,
+    "orderMatches": false
+  }
+}

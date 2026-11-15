@@ -1,7 +1,7 @@
-/* Playlist snapshot observed 2026-11-15. Playback remains official YouTube embed. */
+/* Exact205 playlist positions verified via5actual YouTube API pages on2026-11-16KST. Official embed only. */
 window.LorianoPlaylistCatalog = {
   "playlist": "PLw0Eei7VXrvLJuQGHTo56dq0bGX9cKhy-",
-  "updatedAt": "2026-11-15",
+  "updatedAt": "2026-11-16",
   "tracks": [
     {
       "id": "C_mGlBedPEs",
@@ -804,24 +804,24 @@ window.LorianoPlaylistCatalog = {
       "title": "여호와께 돌아가자(Love Never Fails)"
     },
     {
-      "id": "jV7ej2ZxCyI",
-      "title": "Glorious | 영광의 주님 | 2026 Isaiah6tyOne Conference | Solus Christus: 예수 그리스도"
+      "id": "1KWuUrW7Puo",
+      "title": "기대(주 안에 우린 하나)"
     },
     {
-      "id": "_p5tvz3eq0I",
-      "title": "4. 만물의 주인 (Official) | LORD OF ALL CREATION | 피아워십 정규 4집"
+      "id": "0X0eAtP6Vmo",
+      "title": "해같이 빛나리"
     },
     {
-      "id": "GR_CGRdHlSk",
-      "title": "예수는 나의 힘이요 & 슬픈 마음 있는 사람 - 파워스테이션"
+      "id": "ZMWnUZlg2L0",
+      "title": "왕이신 하나님"
     },
     {
-      "id": "602e5ZZokl0",
-      "title": "16 진리 (Official Video) ㅣ 어노인팅예배캠프2023 #Chapter2"
+      "id": "silsdSB0MsQ",
+      "title": "주 말씀 향하여"
     },
     {
-      "id": "A7SrLerGDKI",
-      "title": "주의 밝은 빛으로 - 마커스워십 (Official) | His shining light"
+      "id": "1Rv3CAnvuho",
+      "title": "사명"
     }
   ]
 };

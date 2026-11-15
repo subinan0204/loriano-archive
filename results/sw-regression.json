@@ -1,0 +1,112 @@
+{
+  "suite": "sw-regression",
+  "generatedAt": "2026-11-15T16:08:20.659Z",
+  "nodeVersion": "v26.5.0",
+  "source": "sw.js",
+  "execution": "Node built-in vm with mocked service-worker APIs; no real browser or network",
+  "total": 25,
+  "passed": 25,
+  "failed": 0,
+  "results": [
+    {
+      "name": "/loriano-archive/ install precaches eleven scope-local shell, policy, manifest and icon resources",
+      "status": "passed"
+    },
+    {
+      "name": "/loriano-archive/ offline navigation uses scope index including nested routes and queries",
+      "status": "passed"
+    },
+    {
+      "name": "/loriano-archive/ canonical assets use network first and refresh offline cache",
+      "status": "passed"
+    },
+    {
+      "name": "/loriano-archive/ old version query links fall back to current canonical versions without poisoning cache",
+      "status": "passed"
+    },
+    {
+      "name": "/loriano-archive/ exact paths prevent nested asset and scope-prefix escape interception",
+      "status": "passed"
+    },
+    {
+      "name": "/test/ install precaches eleven scope-local shell, policy, manifest and icon resources",
+      "status": "passed"
+    },
+    {
+      "name": "/test/ offline navigation uses scope index including nested routes and queries",
+      "status": "passed"
+    },
+    {
+      "name": "/test/ canonical assets use network first and refresh offline cache",
+      "status": "passed"
+    },
+    {
+      "name": "/test/ old version query links fall back to current canonical versions without poisoning cache",
+      "status": "passed"
+    },
+    {
+      "name": "/test/ exact paths prevent nested asset and scope-prefix escape interception",
+      "status": "passed"
+    },
+    {
+      "name": "scope cache namespaces differ and activation never broadly deletes legacy or sibling caches",
+      "status": "passed"
+    },
+    {
+      "name": "install fails clearly when precache or storage fails",
+      "status": "passed"
+    },
+    {
+      "name": "activation tolerates unavailable CacheStorage and navigation preload",
+      "status": "passed"
+    },
+    {
+      "name": "only explicit SKIP_WAITING message opts into activation",
+      "status": "passed"
+    },
+    {
+      "name": "navigation preload takes priority and does not populate runtime cache",
+      "status": "passed"
+    },
+    {
+      "name": "rejected navigation preload still attempts network",
+      "status": "passed"
+    },
+    {
+      "name": "successful navigation uses network but never changes pinned offline index",
+      "status": "passed"
+    },
+    {
+      "name": "cache open failure does not turn a successful network response into failure",
+      "status": "passed"
+    },
+    {
+      "name": "quota/write failure preserves successful network response",
+      "status": "passed"
+    },
+    {
+      "name": "offline cache open/match failures return valid 503 responses",
+      "status": "passed"
+    },
+    {
+      "name": "HTTP errors do not overwrite good precached assets",
+      "status": "passed"
+    },
+    {
+      "name": "opaque and redirected or cross-origin responses are never cached",
+      "status": "passed"
+    },
+    {
+      "name": "cross-origin, API, media, non-GET and unknown assets are bypassed without cache/network work",
+      "status": "passed"
+    },
+    {
+      "name": "same-origin API and media navigations are not handled",
+      "status": "passed"
+    },
+    {
+      "name": "worker is self-contained and never touches persistent user data or claims clients",
+      "status": "passed"
+    }
+  ]
+}

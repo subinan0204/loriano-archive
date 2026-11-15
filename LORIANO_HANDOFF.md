@@ -1,6 +1,6 @@
 # LORIANO 아카이브 운영 인수인계
 
-최신 갱신: 2026-11-15T16:00:44.582Z. 상태: 코드 통합·배포 전 회귀 PASS, 운영 배포 및 최종 실재생 확인 진행 중. 아래 배포 절은 확인 시 계속 갱신합니다.
+최신 갱신: 2026-11-15T16:00:44.582Z. 상태: 운영 배포 및 실제 핵심 재생 검증 완료, 최종 205개 번들 순서 교정 배포 진행. 원본577 프로필, 실기기·설치PWA 전체오프라인은 미확인.
 
 ## 1. 목적과 운영 위치
 개인 브라우저에 보관한 찬양 피아노 영상·댓글·달력·검색을 보존하며, 지정 공개 재생목록 음악을 공식 YouTube IFrame으로 재생하는 정적 PWA입니다.
@@ -62,7 +62,7 @@ aspect-evidence.json: 577개공개치수근거. 개인백업아님.
 mini-player-catalog.js: 지정205기준순서/제목,mini-player-queue.js:순서/셔플/방문/이력(기존유지).
 mini-player.js: public전용큐,검증된개별mini,공식iframe수명/상호pause/상태,오류보존.
 mini-player.css: 반응형352/320/280영상영역,16:9,44px조작부,작은우하단패널.
-sw.js: 외부Workbox의존없는범위별v6-production-safe,11개shell/policy/manifest/iconprecache,범위밖/API/미디어우회,네트워크우선·오프라인fallback,명시적SKIP_WAITING만. 다른앱/legacy캐시무차별삭제없음,개인저장소접근없음.
+sw.js: 외부Workbox의존없는범위별v7-production-safe,11개shell/policy/manifest/iconprecache,범위밖/API/미디어우회,네트워크우선·오프라인fallback,명시적SKIP_WAITING만. 다른앱/legacy캐시무차별삭제없음,개인저장소접근없음.
 manifest.json/icon3개: 기존PWA설정유지.
 playlist-sync-worker.mjs/.test.mjs: 완결성·보존·비밀키프록시,55+52추가회귀.
 wrangler.toml: 기존binding/cron유지. WORKER_SETUP.md,MINI_PLAYER.md,README.md,TESTING.md: 최신운영문서.
@@ -75,11 +75,16 @@ tests/: Node데이터/저장소/플레이어/SW회귀,results/: 개인정보없�
 사전테스트는운영배포완료증거가아님. 아래운영검증절을최종기준으로삼습니다.
 
 ## 10. 배포·운영검증(진행시갱신)
-- 통합commit/push: 대기.
-- CloudflareWorker새version/Build: 대기.
+- 통합commit/push: ce4b35469b21b12c2c161452969d8abe2e351d9b GitHub main반영. 회귀파일추가32b1730.
+- CloudflareWorker: 통합7bc9ae30 Ready23초, 테스트추가66ed37aa Ready22초. 같은검증된Worker소스,Secrets ADMIN_TOKEN/YOUTUBE_API_KEY encrypted,binding/Cron유지확인. 후속문서/목록commit도자동재배포.
 - KV: 기존205정상snapshot보존,수동쓰기/삭제없음.
-- GitHubPages: 대기.
-- 운영파일바이트/실제YouTube/PWA캐시/오프라인검증: 대기.
+- GitHubPages: workflow#36(43초),#37(39초) completed successfully. 운영핵심6파일200+바이트일치.
+- 실제YouTube13개검사: 일반/쇼츠mini state1시간증가,상세재생시mini2/detail1,mini재개시mini1/detail2,일시정지,진행12초,정지0초CUED,이전/다음,셔플/순차/반복,닫기iframe제거/재열기새instance,17초·순차·곡·이력무자동재생복원PASS. pagehide의updatedAt갱신은정상,재접속playback필드동일/iframe0/새페이지쓰기0.
+- UI유형299/278/0/577,검색푯대3개와전체577구분,저장댓글2개,11월달력42칸PASS. 격리사본577/2/1의모든필드원문동일,추가DB쓰기0.
+- 실제원본DB는readonly count만확인: videos0/comments0/meta0. 동일프로필미확인,복원·마이그레이션·재수집미실행.
+- 실제브라우저서비스워커v6설치/대기->명시적업데이트->activated,11개캐시/manifest/icons확인. cachedindex는개인검증HTML아닌정상운영소스. v7새목록은후속재검증.
+- [blocked] 브라우저전체network-offline전환API가없어완전망차단navigation/이미설치된OS PWA실행은미실행. 오프라인fallback은Node모의25PASS+실제브라우저캐시11개확인까지,실제완전오프라인통과로표시하지않음.
+- [blocked] 물리iPhone/Android/tablet기기없음. 5개폭검증은데스크톱Chromium반응형모드.
 
 ## 11. 롤백
 데이터롤백금지. 먼저현재main커밋/Workerversion/피드수보관. 기준commit eb09c24의소스ZIP보유. 새코드에문제가있으면GitHub에서통합commit revert 또는검증된기준파일복원커밋. SW의CACHE버전은새고유값으로높여명시적업데이트유도(개인저장소초기화금지). WorkerDeployments의기준9a6ac319버전을100%로배포하여코드롤백,Secrets/KVbinding과snapshot은유지. KV실패시기존정상값유지,정상데이터인지모르면아무것도덮어쓰지않음. 위험한구버전앱데이터초기화기능이있으므로구버전수집/샘플/초기화는사용금지.
@@ -92,3 +97,6 @@ tests/: Node데이터/저장소/플레이어/SW회귀,results/: 개인정보없�
 5. 새영상치수근거추가시원본backup/DBshorts수정하지말고evidence의출처/시각/일관성과ID정합검증후배포.
 6. 프록시quota남용대비Cloudflareedgecache/rate-limit추가검토. 키는Secret만.
 7. 변경때마다본인수인계/테스트/운영상태갱신후소스패키지재생성. 최종운영미검증을완료라고표시금지.
+
+## 최종목록추가검증과수정
+실제YouTube API5페이지50/50/50/50/5,205고유ID/position0..204연속확인. Worker기존205의ID/순서100%일치. 기존번들catalog마지막5ID가달랐으므로실제목록으로교정,개인DB/KV변경없음. 정확한마지막5:1KWuUrW7Puo,0X0eAtP6Vmo,ZMWnUZlg2L0,silsdSB0MsQ,1Rv3CAnvuho. catalog?v=7,SWv7-production-safe로갱신하고배포후다시검증.

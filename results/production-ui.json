@@ -1,0 +1,44 @@
+{
+  "filters": [
+    {
+      "name": "쇼츠",
+      "expected": 299,
+      "actual": 299,
+      "pass": true
+    },
+    {
+      "name": "롱폼",
+      "expected": 278,
+      "actual": 278,
+      "pass": true
+    },
+    {
+      "name": "검토 필요",
+      "expected": 0,
+      "actual": 0,
+      "pass": true
+    },
+    {
+      "name": "전체 영상",
+      "expected": 577,
+      "actual": 577,
+      "pass": true
+    }
+  ],
+  "search": {
+    "resultText": [
+      "“푯대” 검색 결과 3개",
+      "",
+      "전체 아카이브 577개 중 검색 결과 · 조회 합계 184",
+      "",
+      "롱폼"
+    ],
+    "count": 3
+  },
+  "storedComments": 2,
+  "calendar": {
+    "days": 42,
+    "month": "2026년 11월"
+  },
+  "writes": []
+}
