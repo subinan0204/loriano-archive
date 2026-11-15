@@ -1,0 +1,20 @@
+{
+  "kind": "Existing validation copy, original private profile not identified",
+  "stores": {
+    "videos": {
+      "count": 577,
+      "allFieldsEqual": true
+    },
+    "comments": {
+      "count": 2,
+      "allFieldsEqual": true
+    },
+    "meta": {
+      "count": 1,
+      "allFieldsEqual": true
+    }
+  },
+  "writes": [],
+  "originalLocalStorageUnchanged": false,
+  "originalLocalStorageNote": "Origin-wide fingerprint changed. A separate deployed-v7 tab had an active official player and updated the existing player-state key. No blanket unchanged claim; no restore, migration or manual overwrite performed. Actual original577 profile remains unconfirmed."
+}

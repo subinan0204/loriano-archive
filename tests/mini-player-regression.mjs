@@ -92,6 +92,11 @@ function harness(options = {}) {
     return node;
   }
   for (const id of ['lorianoMini', 'mpBar', 'mpExpand', 'mpTitle', 'mpNote', 'mpPlay', 'mpPrevious', 'mpNext', 'mpStop', 'mpMode', 'mpSeek', 'mpElapsed', 'mpTotal', 'mpStage', 'mpStorage', 'mpCatalogInfo', 'mpVideo', 'mpYouTube', 'view']) makeNode(id);
+  nodes.get('lorianoMini').append(nodes.get('mpBar'));
+  nodes.get('lorianoMini').append(nodes.get('mpStage'));
+  const optionsNode = makeNode('mpOptions');
+  nodes.get('mpBar').append(optionsNode);
+  optionsNode.append(nodes.get('mpMode'));
   const document = {
     hidden: false,
     getElementById(id) { return id === 'archiveVideoPlayer' ? detailFrame : nodes.get(id) || null; },
@@ -450,10 +455,13 @@ test('source invariants preserve archive API and compact uncropped viewport rule
   new vm.Script(PLAYER); new vm.Script(QUEUE);
   ok(!/\b(?:ArchiveEngine|archiveEngine)\s*\.\s*getVideos\s*=/.test(PLAYER));
   ok(!PLAYER.includes('__playlistOverlay')); ok(!PLAYER.includes('getPlaylist()')); ok(!PLAYER.includes("listType: 'playlist'"));
-  ok(CSS.includes('aspect-ratio:16/9')); ok(CSS.includes('width:min(352px,calc(100vw - 24px))'));
-  ok(/@media\(min-width:681px\) and \(max-width:1023px\)\{\.loriano-mini \.mp-stage\{width:min\(320px,/.test(CSS));
-  ok(/@media\(max-width:680px\)\{\.loriano-mini \.mp-stage\{[^}]*width:min\(280px,/.test(CSS));
-  ok(/\.loriano-mini \.mp-button\{width:44px;height:44px\}/.test(CSS), 'Compact controls must expose 44px target height and width');
+  ok(CSS.includes('aspect-ratio:16/9')); ok(CSS.includes('width:min(288px,calc(100vw - 24px))'));
+  ok(/@media\(min-width:681px\) and \(max-width:1023px\)\{\.loriano-mini \.mp-stage\{width:min\(256px,/.test(CSS));
+  ok(CSS.includes('width:min(240px,calc(100vw - 16px))'));
+  ok(CSS.includes('aspect-ratio:9/16'));
+  ok(!CSS.includes('.mp-overlay-open .mp-bar'));
+  ok(CSS.includes('100dvh - 120px'));
+  ok(CSS.includes('width:44px;height:44px'), 'Compact controls must expose 44px target height and width');
   ok(!CSS.includes('min-height:200px')); ok(!CSS.includes('height:270px'));
   equal((CSS.match(/\{/g) || []).length, (CSS.match(/\}/g) || []).length);
 });
@@ -485,12 +493,12 @@ test('worker timeout preserves public queue without initialization storage write
   const h = harness(); await flush(); await h.runTimers(8000);
   same(h.state().ids, PUBLIC); ok(/실패|오류|못|fail|error/i.test(h.nodes.get('mpCatalogInfo').textContent)); equal(h.count('storageWrite'), 0);
 });
-test('floating controls move alongside video and return to original root when closed', async () => {
-  const h = harness(); await flush(); const bar = h.nodes.get('mpBar'); const player = await start(h);
-  equal(bar.parentNode, h.nodes.get('mpStage')); equal(h.nodes.get('mpStage').children.filter(item => item === bar).length, 1);
-  h.click('mpClose'); equal(bar.parentNode, h.nodes.get('lorianoMini')); ok(player.destroyed);
-  equal(h.nodes.get('mpStage').children.filter(item => item === bar).length, 0);
-  await start(h); equal(bar.parentNode, h.nodes.get('mpStage')); equal(h.nodes.get('mpStage').children.filter(item => item === bar).length, 1);
+test('original top controls keep the same parent and index through play close and reopen', async () => {
+  const h = harness(); await flush(); const bar=h.nodes.get('mpBar');const parent=bar.parentNode;const index=parent.children.indexOf(bar);
+  const stable=()=>{equal(bar.parentNode,parent);equal(parent.children.indexOf(bar),index);equal(h.nodes.get('mpStage').children.filter(item=>item===bar).length,0);equal(h.nodes.get('mpClose').parentNode,h.nodes.get('mpOptions'));};
+  stable(); const player=await start(h);stable();equal(h.nodes.get('mpClose').disabled,false);
+  h.click('mpClose');stable();ok(player.destroyed);equal(h.nodes.get('mpClose').disabled,true);
+  await start(h);stable();
 });
 test('detail player loads API and binds before mini player has ever played', async () => {
   const h = harness({ api: false }); await flush(); h.attachDetail(); await flush();
@@ -515,6 +523,11 @@ test('explicit personal short plays manually without modifying public205 queue o
   equal(h.saved().manual.id, PERSONAL[0]); same(h.saved().history, before.history);
   ok(h.nodes.get('mpCatalogInfo').textContent.includes('개별 영상 · 랜덤 후보205곡 별도'));
   ok(h.calls.some(call => call.type === 'pause' && call.detail));
+});
+test('only verified exact portrait evidence selects a portrait manual viewport', async () => {
+  for(const [extra,portrait] of [[{videoType:'short',aspectEvidence:{width:1080,height:1920}},true],[{shorts:true},false],[{videoType:'review',aspectEvidence:{width:1080,height:1920}},false],[{videoType:'short',aspectEvidence:{width:720,height:1000}},false]]){
+    const h=harness({rows:[{id:PERSONAL[0],title:'Manual',duration:45,...extra}]});await flush();await startManual(h);equal(h.state().manual.portrait,portrait);ok(h.calls.some(c=>c.type==='class'&&c.name==='mp-portrait'&&c.active===portrait));h.click('mpNext');equal(h.state().manual,null);equal(h.calls.filter(c=>c.type==='class'&&c.name==='mp-portrait').at(-1).active,false);
+  }
 });
 test('manual play pause seek stop metadata all target independent active ID', async () => {
   const h = harness(); await flush(); const player = await startManual(h); const before = h.state().queue;

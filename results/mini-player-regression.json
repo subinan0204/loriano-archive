@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "suite": "mini-player isolated fake-DOM/storage/YouTube regression",
-  "startedAt": "2026-11-15T16:08:20.745Z",
-  "finishedAt": "2026-11-15T16:08:20.799Z",
-  "nodeVersion": "v26.5.0",
-  "testCount": 67,
-  "passed": 67,
+  "startedAt": "2026-11-15T16:39:32.820Z",
+  "finishedAt": "2026-11-15T16:39:32.866Z",
+  "nodeVersion": "v26.13.1",
+  "testCount": 68,
+  "passed": 68,
   "failed": 0,
-  "assertions": 324,
+  "assertions": 359,
   "success": true,
   "isolation": {
     "nodeBuiltinsOnly": true,
@@ -21,8 +21,8 @@
     "inMemoryReadOnlyTestHook": true
   },
   "sourceSha256": {
-    "mini-player.js": "9851065fe45a0635762b67e536a486b4a4767e237d7753c7f3679da8f4d97c36",
-    "mini-player.css": "3114dbe7dd1f54f4e1908cf2149161f5beb49e53d2479d685a171e61e7e538c2",
+    "mini-player.js": "8fe945f6c5e6588c3ac4fd26456c35bb87b42de2dabcdf6a7f9c4dadbbd5e585",
+    "mini-player.css": "542ab4c3a4e4a3c313c2813d63b1f8cc7c71eec6633460193039ecfec9f410cc",
     "mini-player-queue.js": "6fc243fd93274a614ada2f66270159363651ec06447202d0d28adf1628e29f45",
     "mini-player-catalog.js": "71db7ea4d887691bf6baae73c40bee41709500ddcbcb2a963b3973337f39ff28"
   },
@@ -38,403 +38,409 @@
       "name": "personal getter remains nonwritable and personal 577 never replaces public queue",
       "status": "passed",
       "assertions": 7,
-      "durationMs": 2.507
+      "durationMs": 3.061
     },
     {
       "name": "empty personal archive still uses designated public queue",
       "status": "passed",
       "assertions": 3,
-      "durationMs": 0.518
+      "durationMs": 0.42
     },
     {
       "name": "failed personal archive read cannot block public queue",
       "status": "passed",
       "assertions": 3,
-      "durationMs": 0.56
+      "durationMs": 0.416
     },
     {
       "name": "pending personal archive read cannot delay public queue",
       "status": "passed",
       "assertions": 3,
-      "durationMs": 0.491
+      "durationMs": 0.376
     },
     {
       "name": "personal archive containing only excluded records cannot affect public queue",
       "status": "passed",
       "assertions": 3,
-      "durationMs": 0.587
+      "durationMs": 0.477
     },
     {
       "name": "personal archive failure after initialization cannot prevent public playback",
       "status": "passed",
       "assertions": 2,
-      "durationMs": 1.123
+      "durationMs": 0.942
     },
     {
       "name": "real bundled playlist contains exactly 205 unique valid designated public IDs",
       "status": "passed",
       "assertions": 6,
-      "durationMs": 1.219
+      "durationMs": 1.042
     },
     {
       "name": "saved current position mode and history restore without iframe or autoplay",
       "status": "passed",
       "assertions": 8,
-      "durationMs": 0.566
+      "durationMs": 0.472
     },
     {
       "name": "startup catalog and passive lifecycle preserve saved storage byte-for-byte until interaction",
       "status": "passed",
       "assertions": 4,
-      "durationMs": 0.83
+      "durationMs": 0.646
     },
     {
       "name": "excluded saved current history and visited entries are purged",
       "status": "passed",
       "assertions": 5,
-      "durationMs": 0.87
+      "durationMs": 0.828
     },
     {
       "name": "valid worker feed replaces bundled queue regardless of personal archive",
       "status": "passed",
       "assertions": 3,
-      "durationMs": 0.586
+      "durationMs": 0.557
     },
     {
       "name": "invalid worker excluded ID retains trusted queue and displays explicit error",
       "status": "passed",
       "assertions": 5,
-      "durationMs": 0.652
+      "durationMs": 0.552
     },
     {
       "name": "invalid worker decreased count retains trusted queue and displays explicit error",
       "status": "passed",
       "assertions": 5,
-      "durationMs": 0.508
+      "durationMs": 0.418
     },
     {
       "name": "invalid worker duplicate IDs retains trusted queue and displays explicit error",
       "status": "passed",
       "assertions": 5,
-      "durationMs": 0.507
+      "durationMs": 0.404
     },
     {
       "name": "invalid worker malformed ID retains trusted queue and displays explicit error",
       "status": "passed",
       "assertions": 5,
-      "durationMs": 0.512
+      "durationMs": 0.379
     },
     {
       "name": "invalid worker missing ID retains trusted queue and displays explicit error",
       "status": "passed",
       "assertions": 5,
-      "durationMs": 0.509
+      "durationMs": 0.419
     },
     {
       "name": "invalid worker null track retains trusted queue and displays explicit error",
       "status": "passed",
       "assertions": 5,
-      "durationMs": 0.946
+      "durationMs": 0.366
     },
     {
       "name": "invalid worker empty feed retains trusted queue and displays explicit error",
       "status": "passed",
       "assertions": 5,
-      "durationMs": 0.452
+      "durationMs": 0.707
     },
     {
       "name": "invalid worker incorrect count retains trusted queue and displays explicit error",
       "status": "passed",
       "assertions": 5,
-      "durationMs": 0.55
+      "durationMs": 0.361
     },
     {
       "name": "invalid worker wrong playlist retains trusted queue and displays explicit error",
       "status": "passed",
       "assertions": 5,
-      "durationMs": 0.489
+      "durationMs": 0.368
     },
     {
       "name": "invalid worker wrong schema retains trusted queue and displays explicit error",
       "status": "passed",
       "assertions": 5,
-      "durationMs": 0.477
+      "durationMs": 0.358
     },
     {
       "name": "failed worker request retains trusted bundled queue with explicit error",
       "status": "passed",
       "assertions": 4,
-      "durationMs": 0.471
+      "durationMs": 0.374
     },
     {
       "name": "late worker feed remains authoritative when personal archive changes",
       "status": "passed",
       "assertions": 2,
-      "durationMs": 0.514
+      "durationMs": 0.376
     },
     {
       "name": "personal refresh during pending feed never selects personal records",
       "status": "passed",
       "assertions": 3,
-      "durationMs": 0.55
+      "durationMs": 0.41
     },
     {
       "name": "explicit play creates one official-configured mock and resumes saved offset",
       "status": "passed",
       "assertions": 6,
-      "durationMs": 0.585
+      "durationMs": 0.509
     },
     {
       "name": "play control toggles pause and resume without replacing current video",
       "status": "passed",
       "assertions": 5,
-      "durationMs": 0.766
+      "durationMs": 0.544
     },
     {
       "name": "stop resets progress and cues without restarting playback",
       "status": "passed",
       "assertions": 5,
-      "durationMs": 0.719
+      "durationMs": 1.231
     },
     {
       "name": "next previous and forward-history preserve real queue navigation",
       "status": "passed",
       "assertions": 5,
-      "durationMs": 0.621
+      "durationMs": 0.635
     },
     {
       "name": "sequential mode stops at the last video",
       "status": "passed",
       "assertions": 3,
-      "durationMs": 0.568
+      "durationMs": 0.441
     },
     {
       "name": "repeat mode wraps from last video to first",
       "status": "passed",
       "assertions": 2,
-      "durationMs": 0.537
+      "durationMs": 0.415
     },
     {
       "name": "shuffle visits all videos once before a nonrepeating boundary",
       "status": "passed",
       "assertions": 2,
-      "durationMs": 0.622
+      "durationMs": 0.487
     },
     {
       "name": "mode control cycles shuffle sequential repeat and persists mode",
       "status": "passed",
       "assertions": 6,
-      "durationMs": 0.536
+      "durationMs": 0.385
     },
     {
       "name": "seeking a cued video updates offset without autoplay",
       "status": "passed",
       "assertions": 4,
-      "durationMs": 0.695
+      "durationMs": 0.532
     },
     {
       "name": "seeking a paused video uses seekTo without replaying",
       "status": "passed",
       "assertions": 4,
-      "durationMs": 0.654
+      "durationMs": 0.499
     },
     {
       "name": "metadata updates title elapsed duration and range",
       "status": "passed",
       "assertions": 4,
-      "durationMs": 0.646
+      "durationMs": 0.546
     },
     {
       "name": "ended state advances once and retains user-authorized playback intent",
       "status": "passed",
       "assertions": 3,
-      "durationMs": 0.701
+      "durationMs": 0.502
     },
     {
       "name": "close stops destroys hides and preserves position while ignoring old state events",
       "status": "passed",
       "assertions": 8,
-      "durationMs": 1.13
+      "durationMs": 0.58
     },
     {
       "name": "reopen constructs a fresh player at the retained video and position",
       "status": "passed",
       "assertions": 5,
-      "durationMs": 0.649
+      "durationMs": 0.545
     },
     {
       "name": "close during API loading prevents late iframe construction",
       "status": "passed",
       "assertions": 4,
-      "durationMs": 0.595
+      "durationMs": 0.477
     },
     {
       "name": "close before onReady destroys pending player and permits clean reopening",
       "status": "passed",
       "assertions": 5,
-      "durationMs": 0.715
+      "durationMs": 0.6
     },
     {
       "name": "immediate close after play prevents late setup even with pending personal read",
       "status": "passed",
       "assertions": 3,
-      "durationMs": 0.529
+      "durationMs": 0.436
     },
     {
       "name": "details and mini players keep mutual-pause interaction",
       "status": "passed",
       "assertions": 7,
-      "durationMs": 0.878
+      "durationMs": 0.579
     },
     {
       "name": "document hiding pauses without autoplay on returning",
       "status": "passed",
       "assertions": 2,
-      "durationMs": 0.662
+      "durationMs": 0.527
     },
     {
       "name": "opening a details route pauses mini playback",
       "status": "passed",
       "assertions": 2,
-      "durationMs": 0.638
+      "durationMs": 0.51
     },
     {
       "name": "storage denial shows warning but leaves in-memory playback usable",
       "status": "passed",
       "assertions": 3,
-      "durationMs": 0.69
+      "durationMs": 0.517
     },
     {
       "name": "source invariants preserve archive API and compact uncropped viewport rules",
       "status": "passed",
-      "assertions": 12,
-      "durationMs": 0.698
+      "assertions": 15,
+      "durationMs": 0.622
     },
     {
       "name": "personal saved current is never added to public queue and storage stays untouched until interaction",
       "status": "passed",
       "assertions": 6,
-      "durationMs": 0.626
+      "durationMs": 0.971
     },
     {
       "name": "real trusted205 catalog survives truncated worker snapshot with explicit count error",
       "status": "passed",
       "assertions": 3,
-      "durationMs": 1.613
+      "durationMs": 1.363
     },
     {
       "name": "HTTP failure preserves public queue and reports synchronization failure",
       "status": "passed",
       "assertions": 3,
-      "durationMs": 0.613
+      "durationMs": 0.426
     },
     {
       "name": "invalid worker JSON preserves public queue and reports synchronization failure",
       "status": "passed",
       "assertions": 3,
-      "durationMs": 0.63
+      "durationMs": 0.401
     },
     {
       "name": "worker timeout preserves public queue without initialization storage writes",
       "status": "passed",
       "assertions": 3,
-      "durationMs": 0.579
+      "durationMs": 0.482
     },
     {
-      "name": "floating controls move alongside video and return to original root when closed",
+      "name": "original top controls keep the same parent and index through play close and reopen",
       "status": "passed",
-      "assertions": 7,
-      "durationMs": 1.238
+      "assertions": 19,
+      "durationMs": 0.55
     },
     {
       "name": "detail player loads API and binds before mini player has ever played",
       "status": "passed",
       "assertions": 6,
-      "durationMs": 0.528
+      "durationMs": 0.42
     },
     {
       "name": "explicit personal short plays manually without modifying public205 queue or history",
       "status": "passed",
       "assertions": 11,
-      "durationMs": 1.331
+      "durationMs": 1.098
+    },
+    {
+      "name": "only verified exact portrait evidence selects a portrait manual viewport",
+      "status": "passed",
+      "assertions": 20,
+      "durationMs": 2.093
     },
     {
       "name": "manual play pause seek stop metadata all target independent active ID",
       "status": "passed",
       "assertions": 11,
-      "durationMs": 0.757
+      "durationMs": 0.59
     },
     {
       "name": "manual end stops without advancing random queue or auto playing queue video",
       "status": "passed",
       "assertions": 6,
-      "durationMs": 0.684
+      "durationMs": 0.959
     },
     {
       "name": "mpNext leaves manual and resumes public queue without personal history",
       "status": "passed",
       "assertions": 6,
-      "durationMs": 0.685
+      "durationMs": 0.509
     },
     {
       "name": "mpPrevious leaves manual and resumes public queue without personal history",
       "status": "passed",
       "assertions": 6,
-      "durationMs": 0.661
+      "durationMs": 0.462
     },
     {
       "name": "manual close and reopen creates fresh official player at retained manual offset",
       "status": "passed",
       "assertions": 7,
-      "durationMs": 0.747
+      "durationMs": 0.545
     },
     {
       "name": "verified saved manual restores without iframe autoplay or initial storage writes",
       "status": "passed",
       "assertions": 8,
-      "durationMs": 0.662
+      "durationMs": 0.474
     },
     {
       "name": "unverified or removed saved manual never becomes active or enters queue",
       "status": "passed",
       "assertions": 4,
-      "durationMs": 0.584
+      "durationMs": 0.38
     },
     {
       "name": "manual detail click rejects ID not present in personal archive",
       "status": "passed",
       "assertions": 4,
-      "durationMs": 0.582
+      "durationMs": 0.391
     },
     {
       "name": "close cancels outstanding manual verification before any iframe is created",
       "status": "passed",
       "assertions": 3,
-      "durationMs": 0.582
+      "durationMs": 0.413
     },
     {
       "name": "manual selection reuses ready mini iframe and public next keeps it official",
       "status": "passed",
       "assertions": 8,
-      "durationMs": 0.786
+      "durationMs": 0.6
     },
     {
       "name": "slow saved-manual verification cannot override explicit public navigation",
       "status": "passed",
       "assertions": 3,
-      "durationMs": 0.551
+      "durationMs": 0.429
     },
     {
       "name": "manual selection pending API load is cancelled safely by close",
       "status": "passed",
       "assertions": 3,
-      "durationMs": 1.128
+      "durationMs": 0.413
     },
     {
       "name": "catalog refresh while manual is paused does not overwrite active manual title or progress",
       "status": "passed",
       "assertions": 7,
-      "durationMs": 0.776
+      "durationMs": 0.591
     }
   ]
 }

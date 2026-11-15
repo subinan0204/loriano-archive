@@ -1,3 +1,34 @@
+# 2026-11-16 KST 미니 플레이어 v8 최신 변경
+
+이 절이 아래 과거 v6/v7 UI 설명보다 우선합니다. 이 커밋은 프런트엔드·테스트·문서만 변경하며 Worker/KV/개인DB 스키마·원문을 변경하지 않습니다. 배포 후 검증은 별도 최종 보고로 보완합니다.
+
+## 확인된 기준
+- 시작 GitHub/Pages fda4aad5967b31d6cac95ac66a2bfc7b2d0e9f91, Pages workflow39 성공.
+- Cloudflare 현재 f07113c6 Ready25s 실제 대시보드 확인. 이번 Worker 재배포 불필요. /health snapshot205, updatedAt 2026-11-15T02:18:04.480Z 유지.
+- 기존 복구 ZIP C:\Users\Adnub\Downloads\LORIANO-PRIVATE-recovery-2026-11-15.zip 확인. 내부 private-backup 원문 SHA256 876d0c4604b6fe9297209827642084b168bc7b6b869d2c227c6a66bf894123e4 재검증. 공개 소스와 분리.
+- 복구 ZIP에는 마지막 스마트폰 화면 PNG가 없었고 현행 repo에는 JSON 검증 기록만 있습니다. 이번 화면 증거는 별도 임시 검증 폴더 및 최종 인수인계에 제공.
+
+## 실제 원인과 최소 수정
+expand()가 .mp-bar를 mpStage에 append하여 하단패널로 바꾸던 로직과 관련 CSS를 제거. .mp-bar DOM 부모/순서 불변. header 종료 위치만 상단바 직전으로 조정하여 스크롤 sticky가 전체 앱에서 작동. 닫기도 상단바에 통합. 영상 아래 패널 없음.
+크기와 버튼·비율은 MINI_PLAYER.md 참조. 정확한 양의 정수9:16 증거만 수동 쇼츠뷰로 사용. 개인원문/분류 projection/205큐는 변경하지 않음. SW v8-stable-topbar, player JS/CSS?v=8, catalog?v=7와 queue?v=6 유지.
+
+## 재실행한 모의/정적 검증
+Node26.13.1 임시 포터블, 원문 백업 read-only. data605/605, storage23/23, mini68/68, SW25/25, Worker base+55추가+52proxy PASS. 기존 상단바 이동 테스트를 불변성 검사로 대체하고 근거기반 portrait/복귀 검사 추가. 캐시 버전 기대값만 v8로 조정.
+
+## 배포 전 실제 브라우저 검증
+HTTPS운영origin에서 인메모리 새 UI, 기존 격리 DB loriano-validation-https-final-20261116 및 새 접두사 LS만 사용하는 테스트. private-validation HTML은 공개하지 않음. 원본DB가 아닌 사본577/2/1 모든필드 백업동일, readwrite차단기록0. UI 분류577/299/278/0. 최초iframe0/무자동재생, 일반·쇼츠state1와 시간증가, 상단pause/seek12초/stop0/모드3종/닫기iframe제거/새iframe재열기 확인. 320/390/768/1440 화면·상단8px·하단바0 확인.
+YouTube API5페이지50/50/50/50/5=205고유ID, Worker와번들순서모두일치.
+SW v7 activated 및 v7 캐시 존재 확인. v8 운영캐시·Pages검증은 배포후 별도.
+
+## 확인 한계와 주의
+[blocked] 원본577개프로필 미식별. 현재 원본명DB는0/0/0이나 복원·재수집 근거가 아님.
+[blocked] 물리iOS/Android/tablet 및 기존OS설치PWA·완전망차단 미검증. 반응형모드나 SW모의검사와 혼동금지.
+원본LocalStorage 전체불변은 확인하지 못함: 별도열린 운영v7플레이어탭의 재생상태키가 갱신되어 origin지문변경. 이번 격리 UI는 별도접두사키만 사용. 임의원복/초기화/이관안함. 개인아카이브DB와 재생상태LS를 구분.
+
+최종 소스 패키지: 사용자에게 제공하는 loriano-source-2026-11-16-ui-v8.zip (개인백업/검증HTML/비밀정보 제외).
+
+---
+
 # LORIANO 아카이브 운영 인수인계
 
 최신 갱신: 2026-11-15T16:00:44.582Z. 상태: 운영 배포 및 실제 핵심 재생 검증 완료, 최종 205개 번들 순서 교정 배포 진행. 원본577 프로필, 실기기·설치PWA 전체오프라인은 미확인.

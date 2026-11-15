@@ -1,0 +1,77 @@
+{
+  "seekFinal": {
+    "state": 2,
+    "time": 12,
+    "range": "12"
+  },
+  "viewports": [
+    {
+      "viewport": {
+        "w": 320,
+        "h": 740,
+        "scrollWidth": 305
+      },
+      "barY": 8,
+      "stage": {
+        "w": 112,
+        "h": 199.109375
+      },
+      "portrait": true,
+      "state": 1,
+      "time": 12.284305977111817,
+      "id": "-V5UzDfnsdg",
+      "writes": []
+    },
+    {
+      "viewport": {
+        "w": 390,
+        "h": 844,
+        "scrollWidth": 375
+      },
+      "barY": 8,
+      "stage": {
+        "w": 112,
+        "h": 199.109375
+      },
+      "portrait": true,
+      "state": 1,
+      "time": 12.442305969482423,
+      "id": "-V5UzDfnsdg",
+      "writes": []
+    },
+    {
+      "viewport": {
+        "w": 768,
+        "h": 1024,
+        "scrollWidth": 753
+      },
+      "barY": 8,
+      "stage": {
+        "w": 128,
+        "h": 227.546875
+      },
+      "portrait": true,
+      "state": 1,
+      "time": 12.587243948501587,
+      "id": "-V5UzDfnsdg",
+      "writes": []
+    },
+    {
+      "viewport": {
+        "w": 1440,
+        "h": 900,
+        "scrollWidth": 1425
+      },
+      "barY": 8,
+      "stage": {
+        "w": 144,
+        "h": 256
+      },
+      "portrait": true,
+      "state": 1,
+      "time": 12.766118961853028,
+      "id": "-V5UzDfnsdg",
+      "writes": []
+    }
+  ]
+}

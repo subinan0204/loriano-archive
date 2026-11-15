@@ -43,8 +43,8 @@
   legacyToggle?.remove();
   const closeButton = document.createElement('button');
   closeButton.type = 'button'; closeButton.id = 'mpClose'; closeButton.className = 'mp-close';
-  closeButton.setAttribute('aria-label', '영상 패널 닫기'); closeButton.title = '영상 패널 닫기'; closeButton.textContent = '닫기 ×';
-  $('#mpStage')?.prepend(closeButton);
+  closeButton.setAttribute('aria-label', '영상 패널 닫기'); closeButton.title = '영상 패널 닫기'; closeButton.textContent = '×';
+  $('#mpMode')?.parentNode?.append(closeButton);
   const ui = { title: $('#mpTitle'), note: $('#mpNote'), play: $('#mpPlay'), previous: $('#mpPrevious'), next: $('#mpNext'), stop: $('#mpStop'), mode: $('#mpMode'), range: $('#mpSeek'), elapsed: $('#mpElapsed'), total: $('#mpTotal'), stage: $('#mpStage'), close: $('#mpClose'), storage: $('#mpStorage') };
   const modes = { shuffle: ['랜덤', 'Shuffle'], sequential: ['순차', 'Sequential'], repeat: ['전체 반복', 'Repeat Playlist'] };
   const icons = {
@@ -79,7 +79,6 @@
   let userInteracted = false;
   root.addEventListener('click', () => { userInteracted = true; }, true);
   root.addEventListener('input', () => { userInteracted = true; }, true);
-  const controlBar = root.querySelector('.mp-bar');
   let player, detail, apiPromise, preparing, ready = false, intent = false, playing = false;
   let selected = '', switching = false, movingSeek = false, lastPersist = 0, observedFrame;
   let failed = new Set(), lastError = '', apiTimer, playerGeneration = 0, cancelPreparation;
@@ -89,6 +88,7 @@
   };
   const note = text => { ui.note.textContent = text; ui.note.title = text; };
   function render() {
+    ui.stage.classList.toggle('mp-portrait', !!manual?.portrait);
     ui.title.textContent = title || '수빈이의 찬양 피아노 아카이브';
     ui.title.title = ui.title.textContent;
     ui.mode.textContent = modes[mode][0];
@@ -124,7 +124,8 @@
   function expand(open) {
     ui.stage.hidden = !open;
     root.classList.toggle('mp-overlay-open', open);
-    if (controlBar) { if (open) ui.stage.append(controlBar); else root.prepend(controlBar); }
+    // The original top bar never moves into the floating video.
+    ui.close.disabled = !open;
   }
   function closePanel() {
     ++manualRevision;
@@ -185,7 +186,7 @@
     if (ui.stage.hidden || document.hidden) return false;
     const r = $('#mpVideo').getBoundingClientRect();
     const area = Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0)) * Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0));
-    return r.width >= 160 && r.height >= 90 && area >= r.width * r.height * 0.5;
+    return Math.min(r.width, r.height) >= 90 && Math.max(r.width, r.height) >= 160 && area >= r.width * r.height * 0.5;
   }
   function pauseDetail() {
     try { detail?.pauseVideo(); } catch { /* Removed archive route. */ }
@@ -197,10 +198,11 @@
     const rows = await window.ArchiveEngine?.getVideos();
     const row = Array.isArray(rows) ? rows.find(row => row?.id === id && !row.sample) : null;
     if (!row) throw new Error('개인 아카이브에서 영상을 확인하지 못했어요.');
-    return { id, title: String(row.title || '').slice(0, 500), duration: Math.max(0, Number(row.duration) || 0) };
+    return { id, title: String(row.title || '').slice(0, 500), duration: Math.max(0, Number(row.duration) || 0), portrait: row.videoType === 'short' && Number.isInteger(row.aspectEvidence?.width) && row.aspectEvidence.width > 0 && Number.isInteger(row.aspectEvidence?.height) && row.aspectEvidence.height > 0 && row.aspectEvidence.width * 16 === row.aspectEvidence.height * 9 };
   }
   async function selectManual(id) {
     userInteracted = true;
+    ui.close.disabled = false; // A pending archive lookup must remain cancellable.
     const revision = ++manualRevision;
     try {
       const row = await verifyManual(id);
@@ -211,7 +213,7 @@
       lastError = ''; expand(true); intent = true;
       if (ready) choose(id, 0, true);
       else await prepare();
-    } catch (error) { if (revision === manualRevision) { note(error.message); render(); } }
+    } catch (error) { if (revision === manualRevision) { ui.close.disabled = ui.stage.hidden; note(error.message); render(); } }
   }
   function detailManualButton(frame) {
     const id = /^#video[/]([\w-]{11})(?:$|[?&/])/.exec(location.hash)?.[1];
@@ -421,6 +423,7 @@
     note('재생 모드: ' + modes[mode][0] + (queue ? ' · ' + queue.ids.length + '곡' : ''));
   });
   ui.close.addEventListener('click', closePanel);
+  ui.close.disabled = true;
   refreshCatalog();
   setInterval(() => refreshCatalog(true), 10 * 60 * 1000);
   ui.range.addEventListener('input', () => {

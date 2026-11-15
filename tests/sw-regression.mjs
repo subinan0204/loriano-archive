@@ -9,7 +9,7 @@ const source = await readFile(workerPath, 'utf8');
 const reportPath = new URL('../results/sw-regression.json', import.meta.url);
 const results = [];
 const origin = 'https://example.test';
-const names = ['index.html', 'mini-player.css?v=6', 'mini-player-catalog.js?v=7', 'mini-player-queue.js?v=6', 'mini-player.js?v=6', 'archive-policy.js', 'aspect-evidence.json', 'manifest.json', 'icon-192.png', 'icon-512.png', 'icon-512-maskable.png'];
+const names = ['index.html', 'mini-player.css?v=8', 'mini-player-catalog.js?v=7', 'mini-player-queue.js?v=6', 'mini-player.js?v=8', 'archive-policy.js', 'aspect-evidence.json', 'manifest.json', 'icon-192.png', 'icon-512.png', 'icon-512-maskable.png'];
 
 function harness(scopePath = '/test/', options = {}) {
   const scope = origin + scopePath;
@@ -108,7 +108,7 @@ for (const scope of ['/loriano-archive/', '/test/']) {
     const h = harness(scope); await h.lifecycle('install');
     assert.deepEqual(h.added, names.map(name => h.scope + name));
     assert.equal(h.stores.size, 1);
-    assert.match([...h.stores.keys()][0], /v7-production-safe$/);
+    assert.match([...h.stores.keys()][0], /v8-stable-topbar$/);
     assert.equal(h.skipped, 0);
   });
   await test(`${scope} offline navigation uses scope index including nested routes and queries`, async () => {
@@ -143,7 +143,7 @@ for (const scope of ['/loriano-archive/', '/test/']) {
   });
   await test(`${scope} exact paths prevent nested asset and scope-prefix escape interception`, async () => {
     const h = harness(scope);
-    for (const path of ['/mini-player.js?v=6', scope.slice(0, -1) + '-other/mini-player.js', 'nested/mini-player.js', '../mini-player.js']) {
+    for (const path of ['/mini-player.js?v=8', scope.slice(0, -1) + '-other/mini-player.js', 'nested/mini-player.js', '../mini-player.js']) {
       assert.equal((await h.request(path)).intercepted, false, path);
     }
     assert.equal((await h.request('/outside/', { mode: 'navigate' })).intercepted, false);
@@ -155,7 +155,7 @@ await test('scope cache namespaces differ and activation never broadly deletes l
   await a.lifecycle('install'); await b.lifecycle('install');
   const current = [...a.stores.keys()][0], sibling = [...b.stores.keys()][0];
   assert.notEqual(current, sibling);
-  const obsolete = current.replace(/v7-production-safe$/, 'v4-old');
+  const obsolete = current.replace(/v8-stable-topbar$/, 'v4-old');
   for (const name of [obsolete, sibling, 'pwabuilder-page-v4-mini-player', 'unrelated-user-cache']) a.seed(name);
   await a.lifecycle('activate');
   assert.deepEqual(a.deleted, [obsolete]);
@@ -197,16 +197,16 @@ await test('successful navigation uses network but never changes pinned offline 
 });
 await test('cache open failure does not turn a successful network response into failure', async () => {
   const h = harness('/test/', { openFailure: true });
-  assert.equal((await h.request('mini-player.js?v=6')).response.status, 200);
+  assert.equal((await h.request('mini-player.js?v=8')).response.status, 200);
 });
 await test('quota/write failure preserves successful network response', async () => {
   const h = harness('/test/', { putFailure: true }); await h.lifecycle('install');
-  assert.equal(await (await h.request('mini-player.js?v=6')).response.text(), 'network:' + h.scope + 'mini-player.js?v=6');
+  assert.equal(await (await h.request('mini-player.js?v=8')).response.text(), 'network:' + h.scope + 'mini-player.js?v=8');
 });
 await test('offline cache open/match failures return valid 503 responses', async () => {
   for (const options of [{ openFailure: true }, { matchFailure: true }, {}]) {
     const h = harness('/test/', options); h.setNetwork(offline);
-    for (const [path, mode] of [['mini-player.js?v=6', 'cors'], ['route', 'navigate']]) {
+    for (const [path, mode] of [['mini-player.js?v=8', 'cors'], ['route', 'navigate']]) {
       const result = await h.request(path, { mode });
       assert.equal(result.response.status, 503); assert.match(await result.response.text(), /offline/i);
     }
@@ -215,23 +215,23 @@ await test('offline cache open/match failures return valid 503 responses', async
 await test('HTTP errors do not overwrite good precached assets', async () => {
   const h = harness(); await h.lifecycle('install');
   h.setNetwork(async () => new Response('failure', { status: 500 }));
-  assert.equal((await h.request('mini-player.js?v=6')).response.status, 500);
+  assert.equal((await h.request('mini-player.js?v=8')).response.status, 500);
   assert.equal(h.puts.length, 0); h.setNetwork(offline);
-  assert.equal(await (await h.request('mini-player.js?v=6')).response.text(), 'precache:' + h.scope + 'mini-player.js?v=6');
+  assert.equal(await (await h.request('mini-player.js?v=8')).response.text(), 'precache:' + h.scope + 'mini-player.js?v=8');
 });
 await test('opaque and redirected or cross-origin responses are never cached', async () => {
   for (const extra of [{ type: 'opaque' }, { redirected: true }, { url: 'https://cdn.example/mini-player.js' }, { url: origin + '/outside/mini-player.js' }]) {
     const h = harness();
     h.setNetwork(async () => ({ ok: true, status: 200, type: 'basic', redirected: false, ...extra, clone() { throw new Error('must not clone'); } }));
-    await h.request('mini-player.js?v=6'); assert.equal(h.puts.length, 0);
+    await h.request('mini-player.js?v=8'); assert.equal(h.puts.length, 0);
   }
 });
 await test('cross-origin, API, media, non-GET and unknown assets are bypassed without cache/network work', async () => {
   const h = harness();
-  for (const url of ['https://youtube.com/watch?v=1', 'https://example.net/test/mini-player.js?v=6', 'https://api.example.net/test/mini-player.js', 'api/playlist', 'api/mini-player.js', 'video.mp4', 'audio.mp3', 'unknown.json', 'sw.js']) {
+  for (const url of ['https://youtube.com/watch?v=1', 'https://example.net/test/mini-player.js?v=8', 'https://api.example.net/test/mini-player.js', 'api/playlist', 'api/mini-player.js', 'video.mp4', 'audio.mp3', 'unknown.json', 'sw.js']) {
     assert.equal((await h.request(url)).intercepted, false, url);
   }
-  assert.equal((await h.request('mini-player.js?v=6', { method: 'POST' })).intercepted, false);
+  assert.equal((await h.request('mini-player.js?v=8', { method: 'POST' })).intercepted, false);
   assert.equal((await h.request('route', { method: 'POST', mode: 'navigate' })).intercepted, false);
   assert.equal((await h.request('https://example.net/test/', { mode: 'navigate' })).intercepted, false);
   assert.equal(h.fetched.length, 0); assert.equal(h.stores.size, 0);

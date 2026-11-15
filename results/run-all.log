@@ -25,7 +25,7 @@ PASS cross-origin, API, media, non-GET and unknown assets are bypassed without c
 PASS same-origin API and media navigations are not handled
 PASS worker is self-contained and never touches persistent user data or claims clients
 
-25/25 passed; 0 failed. Report: C:\Users\Adnub\.aside\u\19\sessions\2026-11-16_MRtIB0KjHB6kD6no\tmp\recovered-app\results\sw-regression.json
+25/25 passed; 0 failed. Report: C:\Users\Adnub\.aside\u\20\sessions\2026-11-16_E9juJMSP0Sioryti\tmp\loriano\results\sw-regression.json
 PASS personal getter remains nonwritable and personal 577 never replaces public queue
 PASS empty personal archive still uses designated public queue
 PASS failed personal archive read cannot block public queue
@@ -77,9 +77,10 @@ PASS real trusted205 catalog survives truncated worker snapshot with explicit co
 PASS HTTP failure preserves public queue and reports synchronization failure
 PASS invalid worker JSON preserves public queue and reports synchronization failure
 PASS worker timeout preserves public queue without initialization storage writes
-PASS floating controls move alongside video and return to original root when closed
+PASS original top controls keep the same parent and index through play close and reopen
 PASS detail player loads API and binds before mini player has ever played
 PASS explicit personal short plays manually without modifying public205 queue or history
+PASS only verified exact portrait evidence selects a portrait manual viewport
 PASS manual play pause seek stop metadata all target independent active ID
 PASS manual end stops without advancing random queue or auto playing queue video
 PASS mpNext leaves manual and resumes public queue without personal history
@@ -94,8 +95,8 @@ PASS slow saved-manual verification cannot override explicit public navigation
 PASS manual selection pending API load is cancelled safely by close
 PASS catalog refresh while manual is paused does not overwrite active manual title or progress
 
-67/67 tests passed; 0 failed; 324 assertions.
-Results: C:\Users\Adnub\.aside\u\19\sessions\2026-11-16_MRtIB0KjHB6kD6no\tmp\recovered-app\results\mini-player-regression.json
+68/68 tests passed; 0 failed; 359 assertions.
+Results: C:\Users\Adnub\.aside\u\20\sessions\2026-11-16_E9juJMSP0Sioryti\tmp\loriano\results\mini-player-regression.json
 PASS startup only reads existing data
 PASS channel switch rejects before state/settings writes and catch does not persist
 PASS sample-mode sync rejects before API call or mutation

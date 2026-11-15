@@ -1,7 +1,7 @@
 {
   "suite": "sw-regression",
-  "generatedAt": "2026-11-15T16:08:20.659Z",
-  "nodeVersion": "v26.5.0",
+  "generatedAt": "2026-11-15T16:39:32.757Z",
+  "nodeVersion": "v26.13.1",
   "source": "sw.js",
   "execution": "Node built-in vm with mocked service-worker APIs; no real browser or network",
   "total": 25,

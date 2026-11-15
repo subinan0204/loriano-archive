@@ -1,0 +1,78 @@
+[
+  {
+    "viewport": {
+      "w": 320,
+      "h": 740,
+      "scrollWidth": 305
+    },
+    "barY": 8,
+    "barH": 124,
+    "barParent": "lorianoMini",
+    "stage": {
+      "w": 240,
+      "h": 135
+    },
+    "stageBars": 0,
+    "portrait": false,
+    "state": 1,
+    "time": 15.087641814987183,
+    "id": "PcLZKVrJDs0"
+  },
+  {
+    "viewport": {
+      "w": 390,
+      "h": 844,
+      "scrollWidth": 375
+    },
+    "barY": 8,
+    "barH": 109.984375,
+    "barParent": "lorianoMini",
+    "stage": {
+      "w": 240,
+      "h": 135
+    },
+    "stageBars": 0,
+    "portrait": false,
+    "state": 1,
+    "time": 15.227094186920166,
+    "id": "PcLZKVrJDs0"
+  },
+  {
+    "viewport": {
+      "w": 768,
+      "h": 1024,
+      "scrollWidth": 753
+    },
+    "barY": 8,
+    "barH": 80,
+    "barParent": "lorianoMini",
+    "stage": {
+      "w": 256,
+      "h": 144
+    },
+    "stageBars": 0,
+    "portrait": false,
+    "state": 1,
+    "time": 15.367094053405761,
+    "id": "PcLZKVrJDs0"
+  },
+  {
+    "viewport": {
+      "w": 1440,
+      "h": 900,
+      "scrollWidth": 1425
+    },
+    "barY": 8,
+    "barH": 80,
+    "barParent": "lorianoMini",
+    "stage": {
+      "w": 288,
+      "h": 162
+    },
+    "stageBars": 0,
+    "portrait": false,
+    "state": 1,
+    "time": 15.545197099182129,
+    "id": "PcLZKVrJDs0"
+  }
+]

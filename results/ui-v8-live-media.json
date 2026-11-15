@@ -1,0 +1,76 @@
+{
+  "at": "2026-11-15T16:43:51.026Z",
+  "kind": "Predeployment actual official YouTube playback on HTTPS production origin, modified in-memory UI, existing isolated DB and prefixed player LS; not deployed UI yet",
+  "checks": [
+    {
+      "test": "short actually playing",
+      "state": 1,
+      "time": 47.1459629332428,
+      "id": "-V5UzDfnsdg",
+      "frames": 1,
+      "barParent": "lorianoMini",
+      "stageBars": 0
+    },
+    {
+      "test": "top pause",
+      "state": 2,
+      "time": 47.263706,
+      "id": "-V5UzDfnsdg",
+      "frames": 1,
+      "barParent": "lorianoMini",
+      "stageBars": 0
+    },
+    {
+      "test": "seek while paused",
+      "state": 2,
+      "time": 47.263706,
+      "id": "-V5UzDfnsdg",
+      "frames": 1,
+      "barParent": "lorianoMini",
+      "stageBars": 0
+    },
+    {
+      "test": "stop cue zero",
+      "state": 5,
+      "time": 0,
+      "id": "-V5UzDfnsdg",
+      "frames": 1,
+      "barParent": "lorianoMini",
+      "stageBars": 0
+    },
+    {
+      "test": "all three modes",
+      "modes": [
+        "재생 모드: 순차, 눌러서 변경",
+        "재생 모드: 전체 반복, 눌러서 변경",
+        "재생 모드: 랜덤, 눌러서 변경"
+      ]
+    },
+    {
+      "test": "close destroys frame",
+      "frames": 0,
+      "barParent": "lorianoMini",
+      "stageBars": 0,
+      "disconnected": true
+    }
+  ],
+  "seek": {
+    "state": 2,
+    "time": 12
+  },
+  "reopen": {
+    "freshFrame": true,
+    "realShortPlaying": true,
+    "timeAbove12": true
+  },
+  "startup": {
+    "frames": 0,
+    "autoplay": false
+  },
+  "limits": [
+    "Physical mobile/tablet unavailable",
+    "OS installed PWA and full network-offline browser unavailable",
+    "Original 577 profile not identified",
+    "Origin-wide LS fingerprint changed while separate deployed-v7 player tab was active; no restore performed"
+  ]
+}
