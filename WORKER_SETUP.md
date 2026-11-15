@@ -1,8 +1,7 @@
-# Playlist sync Worker
+# Worker 운영
 
-- `playlist-sync-worker.mjs` is the Cloudflare Worker entry point.
-- `wrangler.toml` binds the existing KV namespace `loriano-playlist-catalog` and schedules the daily Cron at 00:17 UTC (09:17 Korea Standard Time).
-- Cloudflare Worker Secrets are named `YOUTUBE_API_KEY` and `ADMIN_TOKEN`. Do not add their values to this repository. Both names are already configured as encrypted Secrets on the existing Worker.
-- Public snapshot: `GET /api/playlist`. Manual refresh: `POST /api/sync` with `Authorization: Bearer <ADMIN_TOKEN>`. The endpoint writes a single KV value only after every playlist and metadata page has completed and passed validation.
-- Health check: `GET /health`.
-- Test: `node playlist-sync-worker.test.mjs` (uses mocked YouTube responses and never calls the real API).
+구현/운영기준은 LORIANO_HANDOFF.md §7과§10. 기존Worker/KVbinding/Secrets/Cron을 유지하고 GitHub main연동으로 배포합니다. Secret이름:YOUTUBE_API_KEY,ADMIN_TOKEN. 값을 코드/클라이언트/문서에 넣지 않습니다.
+
+GET /health, GET /api/playlist. POST /api/sync는관리자Secret인증과완결성검증이필요,정상205KV를이유없이덮어쓰지않습니다.
+
+읽기전용 /api/youtube/channels,playlistItems,videos,commentThreads,comments는고정로리아노공개채널로제한됩니다. 상세는인수인계참조.

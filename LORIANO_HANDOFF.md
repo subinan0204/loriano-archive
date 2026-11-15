@@ -1,69 +1,94 @@
-# LORIANO 아카이브 인수인계
+# LORIANO 아카이브 운영 인수인계
 
-> 현황 기준: 2026-11-15. 민감한 API 키, 비밀번호, Cloudflare/GitHub 토큰 값은 기록하지 않습니다.
+최신 갱신: 2026-11-15T16:00:44.582Z. 상태: 코드 통합·배포 전 회귀 PASS, 운영 배포 및 최종 실재생 확인 진행 중. 아래 배포 절은 확인 시 계속 갱신합니다.
 
-## 프로젝트와 기존 구조
+## 1. 목적과 운영 위치
+개인 브라우저에 보관한 찬양 피아노 영상·댓글·달력·검색을 보존하며, 지정 공개 재생목록 음악을 공식 YouTube IFrame으로 재생하는 정적 PWA입니다.
+- GitHub main: https://github.com/subinan0204/loriano-archive/
+- 운영: https://subinan0204.github.io/loriano-archive/
+- Worker: https://loriano-playlist-sync.subinan0204.workers.dev
+- Pages: main 루트. Worker Builds도 같은 main, root /, deploy npx wrangler deploy. 빌드/배포는 각각 확인해야 합니다.
+- 기준 정상 commit: eb09c241a05aab9783a7c696d3993a1565e57ded. 원본 ZIP을 비공개 산출물 loriano-before-eb09c24.zip으로 보존.
+- 기준 정상 Worker: https://9a6ac319-loriano-playlist-sync.subinan0204.workers.dev. 기존 feed205개 updatedAt=2026-11-15T02:18:04.480Z 확인.
 
-- GitHub: https://github.com/subinan0204/loriano-archive/ (`main`)
-- GitHub Pages: https://subinan0204.github.io/loriano-archive/
-- 기존 단일 정적 HTML 앱과 별도 JS/CSS 파일 구성입니다.
-- `index.html` 안의 `ArchiveEngine`은 IndexedDB `loriano-archive-v1` v1의 `videos`, `comments`, `meta`와 LocalStorage `loriano-settings-v1`를 사용합니다. 댓글/수집 상태/설정 등 개인 기록을 보관하므로 초기화·전체 덮어쓰기 금지.
-- PWA 오프라인 fallback은 `sw.js`와 Workbox가 처리합니다. 앱 전용 `pwabuilder-page-v*` 캐시 외에는 삭제하지 마세요.
-- 기존 화면: 달력, 영상 모아보기, 인기 영상, 키워드·검색, 상세 영상·댓글, 색상 아카이브 링크, 브라우저 내 채널 동기화/설정. 기존 API 설정·채널 수집 방식은 Worker와 별도로 보존해야 합니다.
+## 2. 절대 지켜야 할 데이터 보호
+코드 배포는 승인, 개인 데이터 쓰기·삭제·복원은 미승인입니다. loriano-archive-v1의 videos/comments/meta, 원래 LocalStorage, 검색/댓글/달력/재생 이력에 복원·마이그레이션·초기화·전체 재수집을 실행하지 않습니다. 원래577개의 프로필은 현재 브라우저와 동일한지 확인되지 않았습니다. 빈 DB 또는0개 표시는 복원/수집 근거가 아닙니다.
+- init/getVideos/getComments는 읽기. 스키마/DB버전1 유지. 자동 sync/자동댓글 수집 중지, 직접 명시 조작 때만 수집.
+- clearDB/reset는 보존 오류로 중단. UI 초기화 비활성화. 채널 변경과 샘플->실제 교체 차단, 보존 오류 catch에서도 meta를 쓰지 않음.
+- sample은 videos/comments/meta 전부0이고 localStorage 모든 값이 비어 있어야 허용. 한 readwrite 트랜잭션 안에서 재검사 후 add만, 경합/실패 때 전체중단. 기존 데이터를 clear/put 교체하지 않음.
+- 댓글 동기화 완료 시 API에 보이지 않는 기존 댓글 삭제 금지.
+- 미니 상태는 사용자 직접 click/input 전에는 쓰지 않음. 원래 키 전체삭제 금지.
+- API키/토큰은 Worker 환경 Secrets만 사용. 기존 개인LS의 legacy apiKey는 이번 배포에서 읽어 사용·출력·삭제·이관하지 않으며 키입력 UI/직접GoogleAPI 호출 제거. 설정 변경 시 기존 사용자설정은 병합 보존.
+- 과거 일회성 삭제 도구 loriano-remove-one.html은 무동작 보호 안내로 대체. 원본은 기준 ZIP 보존.
 
-## 현재 저장소 커밋과 배포
+## 3. 개인577개와 공개205개의 분리
+개인577=IndexedDB 원문 아카이브. 공개205=PLw0Eei7VXrvLJuQGHTo56dq0bGX9cKhy-의 순서 있는 공식 재생 후보. 공개 피드가 개인 목록/달력/숫자를 대체하지 않습니다. getVideos는 non-writable 읽기전용 projection입니다.
+- 랜덤/순차/반복 후보는 지정 재생목록만. 개인577 전체로 fallback 금지.
+- bundled catalog205개는 확인된 기준 목록. Worker실패/중복/형식오류/누락/개수감소는 오류표시 후 마지막정상 유지. 개인자료를 대체후보로 사용하지 않음.
+- 현재205개는 비율조사상 쇼츠0개. 따라서 개인쇼츠의 명시적 개별mini재생을 별도기능으로 지원. 상세의 '미니 플레이어로 보기'는 개인목록에서 ID를 읽기검증하고 manual상태로 재생, 랜덤큐/후보/이력에는 추가하지 않음. 개별재생끝에서 정지. 이전/다음은 public큐로 복귀.
+- Worker는 전체페이지/totalResults/position/ID/세부정보완결성 검사 후 KV snapshot단1회교체. 중간실패시이전보존. 정상기준보다20%초과감소는 실패. 클라이언트는 소폭감소도 보수적으로 거부하므로 실제삭제는 조사후 catalog기준갱신 필요.
 
-- 최신 확인 커밋: `eaa73953f5f0b4b7625cea92aeb2d0a78d3c3c71` (`Refresh player stylesheet cache version`). 앞의 주요 커밋: `539f708`(handoff/Worker), `9411330`(플로팅 CSS), `3ea3eed`(플레이어/SW), `eaa7395`(CSS 캐시 버전).
-- `eaa7395` GitHub Pages 배포 상태는 `success` 확인. 이 문서 업데이트 커밋 뒤 Pages와 연결된 Cloudflare Worker 빌드도 별도 확인 필요.
-- `index.html`은 이번 작업에서 수정하지 않았습니다. IndexedDB 스키마, 사용자 영상/댓글 데이터, LocalStorage 전체를 지우거나 마이그레이션하지 않았습니다.
+## 4. 분류와 표시
+archive-policy.js + aspect-evidence.json은 DB행을 변경하지 않고 화면복사본만 분류합니다.
+정수 width*16===height*9인 정확한 세로9:16만 short. width>=height는 long, 그외세로/치수없음/충돌은 review. 시간·제목·썸네일 추정 금지. 새영상근거없으면 검토필요.
+577행 근거는 실제 YouTube 전달스트림: watch283 + youtubei294, 출처/시각/해상도/itag/치수일관성 포함. 서명미디어URL/쿠키/토큰 없음. 결과577/299/278/0. 모든short근거는정확9:16. 6nF6dD1X72U=1920x1080,178초,long. 원문backupshorts300/277은그대로보존. 목록/전체/유형/검색은동일videosprojection사용,검색결과수와전체수를구분.
 
-## 주요 파일과 변경 내용
+## 5. 미니 플레이어 구조·반응형
+공식YouTube IFrame API, 원본비율/letterbox유지, iframe crop/확대/오디오추출없음.
+- viewport360/390: 영상280x157.5px, 오른쪽8px, 바닥safe-area/8px. 화면이더좁으면폭100vw-16px로축소하고16:9유지.
+- tablet768: 영상320x180px, 오른쪽12px.
+- PC1024/1440: 영상352x198px, 오른쪽16px.
+- 영상과 외부패널 구분: 조작부포함 모바일높이약261.5,tablet284,PC302px. 닫기72x44는영상밖상단에배치. 모든버튼최소44px,완전폭하단시트아님. 컨트롤바는열린동안영상밑으로이동하여스크롤중에도조작가능.
+- 재생/일시정지/정지/이전/다음/셔플/순차/전체반복/진행바/제목/상태복원보존.
+- 최초/복원시iframe없음,자동재생없음. 닫기는stop+destroy+DOM제거,재열기새인스턴스,마지막위치유지. 정지만0초로복귀.
+- mini가재생되면detail.pauseVideo,detail state1이면mini.pause. 의도된일시정지이며iframe파괴는닫기에서만. 상세는mini를한번도열지않아도APIbind. 수동재생은public큐와별도manual키필드로검증복원.
+- 탭숨김/영상가시영역미달일시정지. 작은공식iframe에서광고/제어노출은YouTube정책/기기에영향받을수있음.
 
-- `index.html`: 기존 앱/ArchiveEngine/달력/검색/댓글/분류/샘플·설정 UI. 대용량 파일, 통째 교체 금지.
-- `mini-player-catalog.js`: 2026-11-15 기준 205곡 fallback.
-- `mini-player-queue.js`: 네트워크·DB 부작용 없는 셔플/순차/반복·이력 큐.
-- `mini-player.js`: 이번 수정에서 별도 `mpExpand` 열기 버튼을 런타임 제거하고, 재생 버튼으로 패널 표시·재생, 패널 안 닫기(정지), 공식 IFrame 재사용, Worker 공개 JSON 폴링(10분), queue state 재매핑을 연결했습니다. ArchiveEngine `getVideos()`를 read-only overlay로 감싸 Worker 목록이 있으면 목록/달력에 표시합니다. Worker/JSON이 없으면 기존 IndexedDB 결과 및 205곡 fallback 사용. 기존 DB·댓글은 삭제하지 않습니다. Worker feed가 아직 준비 전이므로 목록 통합 완료로 간주하면 안 됩니다.
-- `mini-player.css`: 오른쪽 아래 fixed panel, 닫기 버튼, PC/모바일 반응형 규칙 추가. 최신 사용자 후속 요청으로 모바일 크기 최적화가 남아 있습니다. 현재 모바일 CSS는 폭 `calc(100vw - 20px)` 및 최소 높이 200px라 360px에서 16:9와 정확히 맞지 않습니다.
-- `sw.js`: 플레이어 전용 캐시를 `pwabuilder-page-v4-mini-player`로 올리고 최신 CSS `?v=2`를 캐시하도록 변경.
-- `LORIANO_HANDOFF.md`: 본 문서.
-- `playlist-sync-worker.mjs`: Worker 구현 소스. 전체 페이지네이션 + 메타데이터, 페이지/응답 검증, 단일 KV snapshot만 성공 후 교체, `/health`, `/api/playlist`, `/api/sync`(관리 Secret 인증), CORS.
-- `playlist-sync-worker.test.mjs`: 실제 YouTube 미호출 mock 테스트.
-- `wrangler.toml`: 기존 KV binding/Worker/루트 엔트리/Cron 설정.
-- `WORKER_SETUP.md`: Secret 이름과 endpoint 안내.
+## 6. 저장구조·백업
+IndexedDB loriano-archive-v1 v1: videos(keyPath id), comments(id, index videoId), meta(keyPath key, state.value).
+LocalStorage loriano-settings-v1=개인설정, loriano-mini-player-v1=version/playlist/current/history/cursor/visited/mode/title/position/duration/manual/updatedAt. 기존기타키보존.
+원문: loriano-private-backup-2026-11-15T03-54-43-435Z.json,707285bytes,SHA256 876d0c4604b6fe9297209827642084b168bc7b6b869d2c227c6a66bf894123e4. payload hash/ID무결성확인. videos577/comments2/meta1,playerState포함,API설정제외.
+원래위치: C:\Users\Adnub\Downloads\LORIANO-PRIVATE-recovery-2026-11-15.zip 내부 private-backup/. 별도산출물 loriano-private-backup-ORIGINAL-2026-11-15.json. 비밀번호암호화백업이아니므로외부공개금지. 공개repo/소스ZIP에개인JSON/검증HTML포함금지.
 
-## 미니 플레이어 상태와 남은 검증
+## 7. Worker/KV/API
+wrangler.toml: name loriano-playlist-sync,main playlist-sync-worker.mjs,compatibility2026-11-15. KV loriano-playlist-catalog binding PLAYLIST_KV,id71c79136ea7243a7ad7021cfaf83eb8b,key playlist:snapshot:v1. Secret이름 YOUTUBE_API_KEY,ADMIN_TOKEN,값은문서/코드/브라우저에기록금지.
+Cron17 0 * * * UTC=매일09:17KST. /health,GET/api/playlist,관리인증POST/api/sync. 운영KV를직접덮어쓰거나지우지않음. 정상feed를그대로유지하며새코드만배포.
+GET/api/youtube/{channels,playlistItems,videos,commentThreads,comments}: 기존명시적개인수집용읽기프록시. 고정채널UCusi43_1xufJnixaugM4_Ng,uploadsUUusi43_1xufJnixaugM4_Ng와지정playlist만허용,endpoint/params/part/ID수/소유권검사,comments는archiveVideoId검증후upstream에미전달. key/token/unknownparam/write거부,오류내용정제,60초publicCache-Control. 아직edge강제레이트제한없음(후속운영고도화).
 
-- 기존 구현은 재생/일시정지·정지·이전/다음·랜덤(한 순회 중복 방지)/순차/전체 반복·제목/시간·위치/모드/이력 저장 및 복원, 상세 영상과의 상호 정지를 지원합니다. 첫 접속 자동재생 없음.
-- 새 변경은 별도 영상 열기 버튼 없이 재생 클릭 시 패널을 열고 공식 YouTube IFrame API를 사용하도록 했습니다. 닫기 버튼은 `닫기 ×`, 정지 후 숨김으로 설계. 같은 iframe/player 재사용.
-- 새 CSS 전에는 브라우저가 이전 `mini-player.css?v=1`을 캐시해 인라인처럼 보였습니다. JS가 CSS URL을 v2로 바꾸고 SW도 v2를 캐시하도록 했습니다. 새 페이지에서 버튼 제거와 `position: fixed`는 확인했지만, 최신 커밋 기준 실제 재생/닫기 E2E와 각 viewport 플로팅 위치는 재검증해야 합니다.
-- 오디오 전용/숨김 재생 금지. 모바일 자동재생 제한 메시지도 확인.
+## 8. 파일별역할과수정이유
+index.html: 기존이미지/화면/ArchiveEngine유지,보존가드/동일데이터분류/수동수집/키없는Worker클라이언트.
+archive-policy.js: exact화면비와excludedID(F5jQv9RPmhE)읽기필터.
+aspect-evidence.json: 577개공개치수근거. 개인백업아님.
+mini-player-catalog.js: 지정205기준순서/제목,mini-player-queue.js:순서/셔플/방문/이력(기존유지).
+mini-player.js: public전용큐,검증된개별mini,공식iframe수명/상호pause/상태,오류보존.
+mini-player.css: 반응형352/320/280영상영역,16:9,44px조작부,작은우하단패널.
+sw.js: 외부Workbox의존없는범위별v6-production-safe,11개shell/policy/manifest/iconprecache,범위밖/API/미디어우회,네트워크우선·오프라인fallback,명시적SKIP_WAITING만. 다른앱/legacy캐시무차별삭제없음,개인저장소접근없음.
+manifest.json/icon3개: 기존PWA설정유지.
+playlist-sync-worker.mjs/.test.mjs: 완결성·보존·비밀키프록시,55+52추가회귀.
+wrangler.toml: 기존binding/cron유지. WORKER_SETUP.md,MINI_PLAYER.md,README.md,TESTING.md: 최신운영문서.
+mini-player-tests.html: 저장소변경없는공개큐329assertions.
+tests/: Node데이터/저장소/플레이어/SW회귀,results/: 개인정보없는검증요약.
 
-## Cloudflare Worker/KV/Cron/Secrets
+## 9. 테스트기록과한계
+실행환경Node26.5.0. 모의/정적: data605/605,storage23/23,mini67/67(324assertions),SW25/25,Worker기본회귀+추가55+proxy52 PASS. 의도한Worker실패로그는보존시험. 테스트실행명령은TESTING.md.
+실제브라우저사전검증: HTTPS운영origin에서로컬통합HTML을실행하되별도DB loriano-validation-https-final-20261116와별도LS prefix사용. 원래DB를열거나복원하지않음. 백업사본577/2/1로UI/비율확인,개인및사본추가쓰기0. 실제공식YouTube일반state1시간증가,개인쇼츠-V5UzDfnsdgstate1시간증가,detail/mini상호pause확인중. 5개viewport실측규격일치·overflow0·최소버튼44. 물리기기아닌데스크톱Chromium에뮬레이션.
+사전테스트는운영배포완료증거가아님. 아래운영검증절을최종기준으로삼습니다.
 
-- Worker: `loriano-playlist-sync`. KV: `loriano-playlist-catalog`, binding `PLAYLIST_KV` (namespace ID는 `wrangler.toml`). 검사 당시 KV는 0 B.
-- 암호화된 Secret 이름이 이미 등록돼 있음을 확인: `YOUTUBE_API_KEY`, `ADMIN_TOKEN`. 값은 읽거나 기록하지 않았고 저장소/브라우저에 넣으면 안 됩니다.
-- Wrangler Cron은 `17 0 * * *` UTC (한국 시간 매일 09:17). Git 연동 전 Cloudflare Settings 화면에는 Cron이 없었으므로 빌드 후 Trigger events에서 확인.
-- Cloudflare Builds를 GitHub `subinan0204/loriano-archive`, branch `main`, Root `/`, Deploy command `npx wrangler deploy`로 연결했습니다. Build command는 None. Cloudflare UI는 연결 후 “push a commit to start your first build”를 표시했습니다. 이번 문서 갱신 커밋이 첫 빌드를 시작하므로 성공/Secret·KV 유지 여부 확인 필수.
-- Quick Edit 첫 배포 시 중괄호 자동완성으로 `Uncaught SyntaxError: Unexpected token '}' at worker.js:164:40`가 발생했고 그 시도는 실패. `editor.autoClosingBrackets=never`로 바꾸고 수정 후 문법 오류 0을 확인하고 Quick Edit이 `Version saved`, version `359bc9c5`를 표시했습니다. 하지만 직후 실제 `/health` fetch는 JSON이 아니라 `Hello World!`를 반환해 production 동작을 확정하지 못했습니다. GitHub Worker build 후 재검증이 기준입니다.
+## 10. 배포·운영검증(진행시갱신)
+- 통합commit/push: 대기.
+- CloudflareWorker새version/Build: 대기.
+- KV: 기존205정상snapshot보존,수동쓰기/삭제없음.
+- GitHubPages: 대기.
+- 운영파일바이트/실제YouTube/PWA캐시/오프라인검증: 대기.
 
-## 테스트와 미검증
+## 11. 롤백
+데이터롤백금지. 먼저현재main커밋/Workerversion/피드수보관. 기준commit eb09c24의소스ZIP보유. 새코드에문제가있으면GitHub에서통합commit revert 또는검증된기준파일복원커밋. SW의CACHE버전은새고유값으로높여명시적업데이트유도(개인저장소초기화금지). WorkerDeployments의기준9a6ac319버전을100%로배포하여코드롤백,Secrets/KVbinding과snapshot은유지. KV실패시기존정상값유지,정상데이터인지모르면아무것도덮어쓰지않음. 위험한구버전앱데이터초기화기능이있으므로구버전수집/샘플/초기화는사용금지.
 
-- 공개 `/mini-player-tests.html`: 기존 queue 회귀 테스트 **329 assertions / 205 tracks PASS**.
-- Worker mock 브라우저 harness: 11개 묶음 확인 통과(205개/5페이지, metadata, 중간 페이지 실패 시 KV 미쓰기·이전 값 유지, CORS, 무인증 거부/관리자 인증). 실제 API/Secret 호출은 없었습니다.
-- 저장소 `playlist-sync-worker.test.mjs`에는 `assert.*` 15개가 있지만 PowerShell 샌드박스의 Node 파일 경로 접근이 거부돼 테스트 파일 자체는 실행하지 못했습니다. Browser mock harness가 별도로 통과한 것입니다.
-- 1440/768/390/360px viewport에서 문서 가로폭은 각각 1425/753/375/345px로 가로 overflow 없음. 데스크톱 Chrome viewport 결과입니다. 플로팅 패널 open 상태/가림/화면 밖 여부는 다시 확인해야 합니다. iPhone Safari/Android 실기기 미실행.
-- 실제 YouTube 재생/정지/닫기/곡 전환/셔플/반복, Worker API 응답/첫 실동기화/실제 Cron/Archive overlay는 완료로 표시하면 안 됩니다.
-
-## 다음 실행 순서
-
-1. 이 handoff 커밋으로 Cloudflare 첫 Git build가 시작됐는지 Deployments에서 확인. 실패 시 logs를 읽고 기존 production/Secrets/KV를 지키며 수정.
-2. 성공 후 Secret 이름, `PLAYLIST_KV`, Trigger events의 `17 0 * * *`를 확인. `/health` JSON의 `configured:true`, `/api/playlist`의 빈 KV 예상 503을 검증.
-3. 관리자가 `POST /api/sync`를 `Authorization: Bearer <ADMIN_TOKEN>`으로 실행해 초기 전체 목록을 생성. 값은 채팅/명령 기록/repo에 쓰지 않음. 성공 후 `/health` count와 `/api/playlist` schema/약 205곡 확인.
-4. 최신 Pages에서 Worker JSON이 player queue/기존 archive read-only overlay에 들어오는지 확인. 삭제된 항목은 보이는 목록에서만 숨기고 IndexedDB 영상/댓글 행은 보존.
-5. 공식 YouTube iframe으로 재생, 일시정지, 정지, 이전/다음, 셔플, 반복, 닫기 후 재생, 상세 영상과 상호 정지를 확인. 새로고침 직후 자동재생 금지 확인.
-6. **사용자가 추가한 후속 요청:** 현재 통합/배포 검증이 끝난 다음, 모바일 플로팅 YouTube 영상을 가능한 작은 실용 크기로 조정. 16:9, 오른쪽 아래 고정, 메뉴/아카이브 가림 최소화, 닫기 터치 영역 유지, PC 배치는 그대로. 360px/390px viewport에서 실제 확인하고, 재생 로직은 바꾸지 않음. YouTube 공식 최소 크기와 16:9 제약을 확인해 양립 가능한 크기 선택.
-7. queue 329, Worker mock, 1440/768/390/360 overflow 및 open panel 가림 테스트, 실재 YouTube 동작, Pages/Cloudflare deployment 성공 확인 후 문서의 커밋/배포 상태 업데이트. 실제 기기 테스트 전 실기기 완료로 표기하지 않음.
-
-## 데이터 보호 체크리스트
-
-`indexedDB.deleteDatabase`, `clearDB`, 기존 store clear, LocalStorage 전체 clear를 실행하지 마세요. API 키/관리 토큰 값을 handoff, 문서, client JS, Worker source, GitHub commit에 포함하지 마세요. 부분 페이지/할당량/응답 오류면 KV 정상 snapshot을 덮어쓰지 않습니다.
+## 12. 남은제약·다음담당자순서
+1. 최신배포절/commit/version/운영실측을먼저읽고같은작업재시작금지.
+2. 원본577개프로필식별은별도미해결. 현재프로필0을데이터없음으로단정하지말것. 사용자추가승인없이복원/마이그레이션/재수집금지.
+3. 실제iOS/Android/물리tablet,이미설치된사용자PWA개별업데이트는실기기/기존프로필확인후별도검증. 에뮬레이션과구분.
+4. 실제삭제로playlist205보다감소하면클라이언트보존가드작동. YouTube전체목록을독립검증한후baseline/catalog수정배포,개인목록fallback금지.
+5. 새영상치수근거추가시원본backup/DBshorts수정하지말고evidence의출처/시각/일관성과ID정합검증후배포.
+6. 프록시quota남용대비Cloudflareedgecache/rate-limit추가검토. 키는Secret만.
+7. 변경때마다본인수인계/테스트/운영상태갱신후소스패키지재생성. 최종운영미검증을완료라고표시금지.
