@@ -10,7 +10,7 @@ function Run-Test([string]$File,[string[]]$Extra=@()) {
 Run-Test (Join-Path $PSScriptRoot 'data-regression.mjs') @($PrivateBackup)
 Run-Test (Join-Path $PSScriptRoot 'sw-regression.mjs')
 Run-Test (Join-Path $PSScriptRoot 'mini-player-regression.mjs')
-Run-Test (Join-Path $PSScriptRoot 'storage-safety.mjs')
+Run-Test (Join-Path $PSScriptRoot 'storage-safety.mjs') @($PrivateBackup)
 Run-Test (Join-Path $root 'playlist-sync-worker.test.mjs')
 $log.Add('PASS: all Node suites. No live network, production DB, deployment, or real media tests were performed.')
 $log | Set-Content -LiteralPath (Join-Path $root 'results\run-all.log') -Encoding utf8

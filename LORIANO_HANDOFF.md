@@ -100,3 +100,9 @@ tests/: Node데이터/저장소/플레이어/SW회귀,results/: 개인정보없�
 
 ## 최종목록추가검증과수정
 실제YouTube API5페이지50/50/50/50/5,205고유ID/position0..204연속확인. Worker기존205의ID/순서100%일치. 기존번들catalog마지막5ID가달랐으므로실제목록으로교정,개인DB/KV변경없음. 정확한마지막5:1KWuUrW7Puo,0X0eAtP6Vmo,ZMWnUZlg2L0,silsdSB0MsQ,1Rv3CAnvuho. catalog?v=7,SWv7-production-safe로갱신하고배포후다시검증.
+
+## 운영배포추가이력
+- 최종catalog/SWcodecommit3240c92a76659a8a78bd408d59f779240a8e9a6d. Worker f07113c6 Ready25초.
+- Pages#38 첫시도는build25초성공,deploy16초단계GitHubAPI502로실패. 코드오류아님. 기존운영정상버전유지상태에서Re-run failed jobs로deploy만재실행.
+- CloudflareBuilds watchpaths를 playlist-sync-worker.mjs 및 wrangler.toml로저장확인. 앞으로문서/프런트/테스트변경만으로동일Worker불필요재배포하지않음. Secrets/KV/Cron변경없음.
+- 기준9a6ac319의More options에Rollback메뉴실재확인,실제롤백실행은안함.
