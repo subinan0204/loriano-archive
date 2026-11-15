@@ -1,0 +1,68 @@
+{
+  "kind": "Actual deployed CSS/JS, read-only existing577 validation DB, redirected player LS, desktop Chromium responsive mode",
+  "viewports": [
+    {
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "state": 1,
+      "time": 16.204360839782716,
+      "id": "-V5UzDfnsdg",
+      "stage": {
+        "w": 112,
+        "h": 199.109375
+      },
+      "bar": {
+        "y": 8,
+        "h": 109.984375
+      },
+      "stageBars": 0,
+      "script": "https://subinan0204.github.io/loriano-archive/mini-player.js?v=8",
+      "dbWrites": [],
+      "redirectedSaves": 10
+    },
+    {
+      "viewport": {
+        "w": 768,
+        "h": 1024
+      },
+      "state": 1,
+      "time": 16.365360853134156,
+      "id": "-V5UzDfnsdg",
+      "stage": {
+        "w": 128,
+        "h": 227.546875
+      },
+      "bar": {
+        "y": 8,
+        "h": 80
+      },
+      "stageBars": 0,
+      "script": "https://subinan0204.github.io/loriano-archive/mini-player.js?v=8",
+      "dbWrites": [],
+      "redirectedSaves": 10
+    },
+    {
+      "viewport": {
+        "w": 1440,
+        "h": 900
+      },
+      "state": 1,
+      "time": 16.497840131607056,
+      "id": "-V5UzDfnsdg",
+      "stage": {
+        "w": 144,
+        "h": 256
+      },
+      "bar": {
+        "y": 8,
+        "h": 80
+      },
+      "stageBars": 0,
+      "script": "https://subinan0204.github.io/loriano-archive/mini-player.js?v=8",
+      "dbWrites": [],
+      "redirectedSaves": 10
+    }
+  ]
+}

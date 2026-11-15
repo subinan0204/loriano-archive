@@ -1,0 +1,54 @@
+{
+  "active": "activated",
+  "caches": [
+    "pwabuilder-page-v4-mini-player",
+    "loriano-archive-app:https://subinan0204.github.io/loriano-archive/:v8-stable-topbar"
+  ],
+  "cacheKeys": [
+    "https://subinan0204.github.io/loriano-archive/index.html",
+    "https://subinan0204.github.io/loriano-archive/archive-policy.js",
+    "https://subinan0204.github.io/loriano-archive/icon-512.png",
+    "https://subinan0204.github.io/loriano-archive/icon-512-maskable.png",
+    "https://subinan0204.github.io/loriano-archive/manifest.json",
+    "https://subinan0204.github.io/loriano-archive/mini-player.css?v=8",
+    "https://subinan0204.github.io/loriano-archive/mini-player-catalog.js?v=7",
+    "https://subinan0204.github.io/loriano-archive/mini-player-queue.js?v=6",
+    "https://subinan0204.github.io/loriano-archive/mini-player.js?v=8",
+    "https://subinan0204.github.io/loriano-archive/aspect-evidence.json",
+    "https://subinan0204.github.io/loriano-archive/icon-192.png"
+  ],
+  "manifest": {
+    "background_color": "#ffffff",
+    "dir": "ltr",
+    "display": "standalone",
+    "name": "LORIANO 아카이브",
+    "short_name": "LORIANO 아카이브",
+    "description": "LORIANO 아카이브 - 예배 피아노 연주와 찬양 기록",
+    "orientation": "any",
+    "scope": "/loriano-archive/",
+    "start_url": "/loriano-archive/",
+    "theme_color": "#fdfbf7",
+    "icons": [
+      {
+        "src": "/loriano-archive/icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "/loriano-archive/icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "/loriano-archive/icon-512-maskable.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
+      }
+    ]
+  },
+  "dbWrites": [],
+  "cachedIndexMatchesSource": true
+}

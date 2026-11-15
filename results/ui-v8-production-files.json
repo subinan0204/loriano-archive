@@ -1,0 +1,43 @@
+{
+  "commit": "62fd2ef9fcc7376792e765a1cd409a0ce4d8a021",
+  "run": 43737176390,
+  "status": "completed",
+  "conclusion": "success",
+  "files": [
+    {
+      "file": "index.html",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "file": "mini-player.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "file": "mini-player.css",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "file": "sw.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "file": "mini-player-catalog.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "file": "archive-policy.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "file": "aspect-evidence.json",
+      "status": 200,
+      "matches": true
+    }
+  ]
+}
