@@ -3,7 +3,7 @@
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
 
-const CACHE = "pwabuilder-page-v3-mini-player";
+const CACHE = "pwabuilder-page-v4-mini-player";
 
 const offlineFallbackPage = "/loriano-archive/index.html";
 

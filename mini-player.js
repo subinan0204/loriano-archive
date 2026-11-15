@@ -4,9 +4,53 @@
   const root = document.getElementById('lorianoMini');
   if (!root || !window.LorianoQueue) return;
   const PLAYLIST = 'PLw0Eei7VXrvLJuQGHTo56dq0bGX9cKhy-';
+  const WORKER_JSON = 'https://loriano-playlist-sync.subinan0204.workers.dev/api/playlist';
   const KEY = 'loriano-mini-player-v1';
   const $ = selector => root.querySelector(selector);
-  const ui = { title: $('#mpTitle'), note: $('#mpNote'), play: $('#mpPlay'), previous: $('#mpPrevious'), next: $('#mpNext'), stop: $('#mpStop'), mode: $('#mpMode'), range: $('#mpSeek'), elapsed: $('#mpElapsed'), total: $('#mpTotal'), stage: $('#mpStage'), expand: $('#mpExpand'), storage: $('#mpStorage') };
+  let publicSnapshot = null, publicSnapshotAt = 0, publicSnapshotRequest = null;
+  async function getPublicSnapshot(force = false) {
+    if (!force && publicSnapshot && Date.now() - publicSnapshotAt < 60000) return publicSnapshot;
+    if (publicSnapshotRequest) return publicSnapshotRequest;
+    publicSnapshotRequest = (async () => {
+      const response = await fetch(WORKER_JSON, { credentials: 'omit', cache: force ? 'no-store' : 'default' });
+      if (!response.ok) throw new Error('Playlist feed unavailable');
+      const data = await response.json();
+      if (data.schema !== 1 || data.playlistId !== PLAYLIST || !Array.isArray(data.tracks) || !data.tracks.length || data.count !== data.tracks.length) throw new Error('Invalid playlist feed');
+      const unique = new Map();
+      for (const track of data.tracks) {
+        if (!/^[\w-]{11}$/.test(track?.id || '')) continue;
+        const publishedAt = Number.isFinite(Date.parse(track.publishedAt)) ? track.publishedAt : new Date(0).toISOString();
+        const thumbnail = /^https:\/\/(i\.ytimg\.com|yt3\.ggpht\.com)\//i.test(track.thumbnail || '') ? track.thumbnail : 'https://i.ytimg.com/vi/' + track.id + '/mqdefault.jpg';
+        unique.set(track.id, { id: track.id, title: String(track.title || 'YouTube 영상').slice(0, 500), description: String(track.description || '').slice(0, 10000), publishedAt, thumbnail, duration: Math.max(0, Number(track.duration) || 0), shorts: !!track.shorts, views: Math.max(0, Number(track.views) || 0), likes: Math.max(0, Number(track.likes) || 0), comments: Math.max(0, Number(track.comments) || 0), tags: Array.isArray(track.tags) ? track.tags.slice(0, 100).map(tag => String(tag).slice(0, 100)) : [], sample: false });
+      }
+      if (!unique.size) throw new Error('Empty playlist feed');
+      publicSnapshot = { schema: 1, playlistId: PLAYLIST, updatedAt: String(data.updatedAt || '최신'), count: unique.size, tracks: [...unique.values()] };
+      publicSnapshotAt = Date.now();
+      return publicSnapshot;
+    })().finally(() => { publicSnapshotRequest = null; });
+    return publicSnapshotRequest;
+  }
+  const archiveEngine = window.ArchiveEngine;
+  if (archiveEngine?.getVideos && !archiveEngine.__playlistOverlay) {
+    const storedVideos = archiveEngine.getVideos.bind(archiveEngine);
+    archiveEngine.getVideos = async (...args) => {
+      const stored = await storedVideos(...args);
+      try {
+        if (stored.length && stored.every(video => video.sample)) return stored;
+        const snapshot = await getPublicSnapshot();
+        const previous = new Map(stored.map(video => [video.id, video]));
+        return snapshot.tracks.map(video => ({ ...previous.get(video.id), ...video, sample: false }));
+      } catch { return stored; }
+    };
+    archiveEngine.__playlistOverlay = true;
+  }
+  const legacyToggle = $('#mpExpand');
+  legacyToggle?.remove();
+  const closeButton = document.createElement('button');
+  closeButton.type = 'button'; closeButton.id = 'mpClose'; closeButton.className = 'mp-close';
+  closeButton.setAttribute('aria-label', '영상 패널 닫기'); closeButton.title = '영상 패널 닫기'; closeButton.textContent = '닫기 ×';
+  $('#mpStage')?.prepend(closeButton);
+  const ui = { title: $('#mpTitle'), note: $('#mpNote'), play: $('#mpPlay'), previous: $('#mpPrevious'), next: $('#mpNext'), stop: $('#mpStop'), mode: $('#mpMode'), range: $('#mpSeek'), elapsed: $('#mpElapsed'), total: $('#mpTotal'), stage: $('#mpStage'), close: $('#mpClose'), storage: $('#mpStorage') };
   const modes = { shuffle: ['랜덤', 'Shuffle'], sequential: ['순차', 'Sequential'], repeat: ['전체 반복', 'Repeat Playlist'] };
   const icons = {
     play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7Z" fill="currentColor" stroke="none"/></svg>',
@@ -68,11 +112,42 @@
     persist(); render();
   }
   function expand(open) {
-    if (!open) pause('영상 패널을 닫아 일시정지했어요.');
     ui.stage.hidden = !open;
-    ui.expand.setAttribute('aria-expanded', String(open));
-    ui.expand.setAttribute('aria-label', open ? '영상 패널 닫기' : '영상 패널 열기');
-    if (open) ui.stage.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+    root.classList.toggle('mp-overlay-open', open);
+  }
+  function closePanel() {
+    intent = false; playing = false; switching = true;
+    if (ready && player) { player.stopVideo(); if (queue?.current) player.cueVideoById({ videoId: queue.current, startSeconds: 0 }); }
+    position = 0;
+    expand(false); note('영상 패널을 닫고 재생을 중단했어요.'); persist(); render();
+  }
+  let pendingCatalog = null, workerRefresh = null;
+  function applyCatalog(snapshot) {
+    if (!snapshot?.tracks?.length) return;
+    const wasCurrent = queue?.current || '';
+    const old = queue?.snapshot() || { ...saved, mode };
+    tracks = snapshot.tracks.map(track => ({ id: track.id, title: track.title }));
+    queue = new window.LorianoQueue(tracks.map(track => track.id), { ...old, mode });
+    const removed = wasCurrent && queue.current !== wasCurrent;
+    if (removed) { position = 0; duration = 0; }
+    const currentTrack = tracks.find(track => track.id === queue.current);
+    if (currentTrack?.title && !playing) title = currentTrack.title;
+    playlistNote = 'Worker 동기화 · ' + snapshot.updatedAt;
+    if (removed && ready && queue.current) { switching = true; player.cueVideoById({ videoId: queue.current, startSeconds: 0 }); }
+    persist(); render();
+  }
+  async function refreshWorkerCatalog() {
+    if (workerRefresh) return workerRefresh;
+    workerRefresh = (async () => {
+      try {
+        const data = await getPublicSnapshot(true);
+        const snapshot = { tracks: data.tracks.map(track => ({ id: track.id, title: track.title })), updatedAt: data.updatedAt };
+        if (playing || intent) pendingCatalog = snapshot; else applyCatalog(snapshot);
+        return true;
+      } catch { return false; }
+      finally { workerRefresh = null; }
+    })();
+    return workerRefresh;
   }
   function visible() {
     if (ui.stage.hidden || document.hidden) return false;
@@ -178,6 +253,7 @@
       if (visible()) advance(1, true);
       else pause('다음 곡은 재생 버튼을 눌러 이어 들어요.');
     }
+    if (!playing && !intent && pendingCatalog) { const pending = pendingCatalog; pendingCatalog = null; applyCatalog(pending); }
     render(); persist();
   }
   function playerError(event) {
@@ -189,46 +265,12 @@
     // Never spin through unavailable tracks or retry with an unofficial endpoint.
     render(); persist();
   }
-  async function refreshPlaylist() {
-    // Reuse an already configured key. Never require or embed a new credential.
-    let apiKey;
-    try { apiKey = window.ArchiveEngine?.settings()?.apiKey; } catch {}
-    if (!apiKey) return;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
-    try {
-      const fresh = []; let pageToken = ''; const seenTokens = new Set();
-      do {
-        if (seenTokens.has(pageToken)) throw new Error('Repeated playlist page');
-        seenTokens.add(pageToken);
-        const url = new URL('https://www.googleapis.com/youtube/v3/playlistItems');
-        for (const [key, value] of Object.entries({ part: 'snippet,contentDetails', playlistId: PLAYLIST, maxResults: '50', key: apiKey, ...(pageToken ? { pageToken } : {}) })) url.searchParams.set(key, value);
-        const response = await fetch(url, { signal: controller.signal, credentials: 'omit' });
-        if (!response.ok) throw new Error('Playlist refresh unavailable');
-        const data = await response.json();
-        for (const item of data.items || []) {
-          const id = item.contentDetails?.videoId;
-          if (/^[\w-]{11}$/.test(id || '') && !['Private video', 'Deleted video'].includes(item.snippet?.title)) fresh.push({ id, title: item.snippet?.title || '' });
-        }
-        pageToken = data.nextPageToken || '';
-      } while (pageToken);
-      if (fresh.length) {
-        const old = queue.snapshot(); const oldId = queue.current;
-        tracks = fresh; queue = new window.LorianoQueue(fresh.map(track => track.id), { ...old, mode });
-        if (queue.current !== oldId) { position = 0; duration = 0; title = ''; }
-        title = tracks.find(track => track.id === queue.current)?.title || title;
-        playlistNote = '공식 API로 전체 목록 갱신 · ' + fresh.length + '곡';
-      }
-    } catch {
-      playlistNote = '목록 갱신 불가 · 저장된 ' + tracks.length + '곡 사용 (' + (catalog?.updatedAt || '날짜 미상') + ')';
-    } finally { clearTimeout(timeout); render(); }
-  }
   async function prepare() {
     if (ready && queue) return;
     if (preparing) return preparing;
     preparing = (async () => {
       note('YouTube 재생목록을 연결하고 있어요…');
-      await refreshPlaylist();
+      await refreshWorkerCatalog();
       await loadAPI();
       bindDetail();
       await new Promise((resolve, reject) => {
@@ -250,7 +292,7 @@
                 if (settled) return;
                 const ids = queue.ids.length ? queue.ids : player.getPlaylist() || [];
                 if (ids.length) {
-                  if (!queue.ids.length) { queue = new window.LorianoQueue(ids, { ...saved, mode }); playlistNote = 'IFrame 제공 목록 ' + ids.length + '곡 · 전체 갱신에는 설정의 API 키가 필요해요.'; }
+                  if (!queue.ids.length) { queue = new window.LorianoQueue(ids, { ...saved, mode }); playlistNote = 'Worker 동기화 준비 전 · IFrame 제공 목록 ' + ids.length + '곡'; }
                   choose(queue.current, position, intent);
                   finish();
                 } else if (Date.now() - started < 18000) setTimeout(read, 200);
@@ -299,11 +341,9 @@
     queue?.setMode(mode); render(); persist();
     note('재생 모드: ' + modes[mode][0] + (queue ? ' · ' + queue.ids.length + '곡' : ''));
   });
-  ui.expand.addEventListener('click', async () => {
-    const open = ui.stage.hidden;
-    expand(open);
-    if (open && !ready) { try { await prepare(); } catch {} }
-  });
+  ui.close.addEventListener('click', closePanel);
+  refreshWorkerCatalog();
+  setInterval(() => refreshWorkerCatalog(), 10 * 60 * 1000);
   ui.range.addEventListener('input', () => {
     movingSeek = true; ui.elapsed.textContent = time(ui.range.value);
     ui.range.setAttribute('aria-valuetext', time(ui.range.value) + ' / ' + time(duration));
