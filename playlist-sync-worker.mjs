@@ -1,3 +1,5 @@
+import { videoDimensions } from './video-dimensions.mjs';
+
 const PLAYLIST_ID = 'PLw0Eei7VXrvLJuQGHTo56dq0bGX9cKhy-';
 const SNAPSHOT_KEY = 'playlist:snapshot:v1';
 const ALLOWED_ORIGIN = 'https://subinan0204.github.io';
@@ -57,10 +59,13 @@ function seconds(iso) {
   return value;
 }
 
-async function youtubeJson(url, env) {
+async function youtubeJson(url, env, externalSignal) {
   url.searchParams.set('key', env.YOUTUBE_API_KEY);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 20000);
+  const abortExternal = () => controller.abort();
+  if (externalSignal?.aborted) controller.abort();
+  externalSignal?.addEventListener('abort', abortExternal, { once: true });
   try {
     const response = await fetch(url, { signal: controller.signal });
     let body;
@@ -71,7 +76,7 @@ async function youtubeJson(url, env) {
   } catch {
     // Never propagate URLs, upstream bodies, or transport messages containing secrets.
     throw new Error('YouTube API request or response failed');
-  } finally { clearTimeout(timer); }
+  } finally { clearTimeout(timer); externalSignal?.removeEventListener('abort', abortExternal); }
 }
 
 async function createSnapshot(env) {
@@ -194,11 +199,11 @@ const PROXY_PARTS = {
   playlistItems: ['snippet', 'contentDetails'], videos: ['snippet', 'contentDetails', 'statistics'],
   commentThreads: ['snippet', 'replies'], comments: ['snippet']
 };
-async function archiveVideo(id, env) {
+async function archiveVideo(id, env, signal) {
   const url = new URL('https://www.googleapis.com/youtube/v3/videos');
   url.searchParams.set('part', 'snippet');
   url.searchParams.set('id', id);
-  const body = await youtubeJson(url, env);
+  const body = await youtubeJson(url, env, signal);
   requireData(Array.isArray(body.items) && body.items.length === 1 && body.items[0]?.id === id &&
     body.items[0]?.snippet?.channelId === ARCHIVE_CHANNEL, 'Video is outside the archive channel');
 }
@@ -290,13 +295,14 @@ async function youtubeProxy(request, env, endpoint) {
 
 async function handleFetch(request, env) {
   const url = new URL(request.url);
+  if (url.pathname === '/api/video-dimensions') return videoDimensions(request, env, archiveVideo, reply);
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
   if (url.pathname.startsWith('/api/youtube/')) return youtubeProxy(request, env, url.pathname.slice('/api/youtube/'.length));
   if (url.pathname === '/health' && request.method === 'GET') {
     const value = await env.PLAYLIST_KV?.get(SNAPSHOT_KEY);
     let snapshot;
     try { snapshot = value ? JSON.parse(value) : null; } catch { snapshot = null; }
-    return reply(200, { ok: true, configured: !!(env.YOUTUBE_API_KEY && env.PLAYLIST_KV), hasSnapshot: !!snapshot, updatedAt: snapshot?.updatedAt || null, count: snapshot?.count || 0 });
+    return reply(200, { ok: true, dimensionsVersion: 'v1-20261118', configured: !!(env.YOUTUBE_API_KEY && env.PLAYLIST_KV), hasSnapshot: !!snapshot, updatedAt: snapshot?.updatedAt || null, count: snapshot?.count || 0 });
   }
   if (url.pathname === '/api/playlist' && request.method === 'GET') {
     const value = await env.PLAYLIST_KV?.get(SNAPSHOT_KEY);
