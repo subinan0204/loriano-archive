@@ -1,0 +1,30 @@
+{
+  "commit": "2a0856c82c3265d9dea8fc5b8951d3bf3c28acc5",
+  "version": "v1-20261118",
+  "results": [
+    {
+      "id": "mq1lk0uTm0s",
+      "status": 502,
+      "body": {
+        "status": "pending",
+        "error": "Video dimensions unavailable; retain review"
+      }
+    },
+    {
+      "id": "1zYk3516rEA",
+      "status": 502,
+      "body": {
+        "status": "pending",
+        "error": "Video dimensions unavailable; retain review"
+      }
+    },
+    {
+      "id": "tfYSAdIo-ps",
+      "status": 502,
+      "body": {
+        "status": "pending",
+        "error": "Video dimensions unavailable; retain review"
+      }
+    }
+  ]
+}
